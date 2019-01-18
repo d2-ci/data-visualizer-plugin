@@ -106,6 +106,7 @@ describe('ChartPlugin', function () {
         props = {
             config: {},
             filters: {},
+            style: { height: 100 },
             id: '1',
             onChartGenerated: jest.fn(),
             onResponsesReceived: jest.fn(),
@@ -128,6 +129,11 @@ describe('ChartPlugin', function () {
 
         it('renders a div', function (done) {
             expect(canvas().find('div').length).toBeGreaterThan(0);
+            done();
+        });
+
+        it('uses the style passed as prop', function (done) {
+            expect(canvas().find('div').prop('style')).toEqual(props.style);
             done();
         });
 
