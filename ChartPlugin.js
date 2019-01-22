@@ -231,7 +231,7 @@ ChartPlugin.defaultProps = {
 };
 
 ChartPlugin.propTypes = {
-    id: PropTypes.string,
+    id: PropTypes.number,
     animation: PropTypes.number,
     config: PropTypes.object.isRequired,
     filters: PropTypes.object,
