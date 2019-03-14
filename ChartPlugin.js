@@ -119,7 +119,7 @@ var _initialiseProps = function _initialiseProps() {
     };
 
     this.getConfigById = function (id) {
-        return apiFetchVisualization('chart', id);
+        return apiFetchVisualization(_this2.props.d2, 'chart', id);
     };
 
     this.renderChart = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
@@ -176,7 +176,7 @@ var _initialiseProps = function _initialiseProps() {
 
                     case 24:
                         _context.next = 26;
-                        return apiFetchAnalytics(visualization, options);
+                        return apiFetchAnalytics(_this2.props.d2, visualization, options);
 
                     case 26:
                         responses = _context.sent;
@@ -232,6 +232,7 @@ ChartPlugin.defaultProps = {
 
 ChartPlugin.propTypes = {
     id: PropTypes.number,
+    d2: PropTypes.object.isRequired,
     animation: PropTypes.number,
     config: PropTypes.object.isRequired,
     filters: PropTypes.object,
