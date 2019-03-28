@@ -245,9 +245,9 @@ describe('ChartPlugin', function () {
 
                 setTimeout(function () {
                     expect(api.apiFetchAnalyticsForYearOverYear).toHaveBeenCalled();
-                    expect(api.apiFetchAnalyticsForYearOverYear.mock.calls[0][1]).toEqual({
+                    expect(api.apiFetchAnalyticsForYearOverYear.mock.calls[0][1]).toEqual(_extends({}, yearOverYearCurrentMock, {
                         option1: 'def'
-                    });
+                    }));
 
                     done();
                 });

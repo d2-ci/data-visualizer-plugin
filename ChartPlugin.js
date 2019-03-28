@@ -161,7 +161,7 @@ var _initialiseProps = function _initialiseProps() {
 
                         yearlySeriesLabels = [];
                         _context.next = 17;
-                        return apiFetchAnalyticsForYearOverYear(visualization, options);
+                        return apiFetchAnalyticsForYearOverYear(_this2.props.d2, visualization, options);
 
                     case 17:
                         _ref4 = _context.sent;
