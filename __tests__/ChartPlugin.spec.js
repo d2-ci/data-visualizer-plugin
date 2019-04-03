@@ -169,11 +169,10 @@ describe('ChartPlugin', function () {
             });
         });
 
-        it('fetches the AO by id when forDashboard is passed', function (done) {
+        it('fetches the AO by id when only id is passed in config', function (done) {
             props.forDashboard = true;
             props.config = {
-                id: 'test1',
-                type: COLUMN
+                id: 'test1'
             };
 
             canvas();

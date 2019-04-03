@@ -132,7 +132,7 @@ var _initialiseProps = function _initialiseProps() {
                         _props = _this2.props, config = _props.config, filters = _props.filters, forDashboard = _props.forDashboard, onResponsesReceived = _props.onResponsesReceived, onChartGenerated = _props.onChartGenerated, onError = _props.onError;
                         _context.prev = 1;
 
-                        if (!(forDashboard || Object.keys(config).length === 1)) {
+                        if (!(Object.keys(config).length === 1 && config.id)) {
                             _context.next = 8;
                             break;
                         }
