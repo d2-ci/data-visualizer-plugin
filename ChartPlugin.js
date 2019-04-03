@@ -93,7 +93,7 @@ var _initialiseProps = function _initialiseProps() {
                 props = _ref2[1];
 
             // only add parameter if value !== default
-            if (visualization[option] !== props.defaultValue) {
+            if (visualization[option] !== undefined && visualization[option] !== props.defaultValue) {
                 map[option] = visualization[option];
             }
 
