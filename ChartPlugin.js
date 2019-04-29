@@ -14,9 +14,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-
+import isEqual from 'lodash-es/isEqual';
 import { createChart } from 'd2-charts-api';
-
 import { apiFetchVisualization } from './api/visualization';
 import { apiFetchAnalytics, apiFetchAnalyticsForYearOverYear } from './api/analytics';
 import { isYearOverYear } from './modules/chartTypes';
@@ -53,12 +52,12 @@ var ChartPlugin = function (_Component) {
     }, {
         key: 'componentDidUpdate',
         value: function componentDidUpdate(prevProps) {
-            if (this.props.config !== prevProps.config) {
+            if (!isEqual(this.props.config, prevProps.config)) {
                 this.renderChart();
                 return;
             }
 
-            if (this.props.filters !== prevProps.filters) {
+            if (!isEqual(this.props.filters, prevProps.filters)) {
                 this.renderChart();
                 return;
             }
