@@ -63,7 +63,8 @@ var ChartPlugin = function (_Component) {
                 return;
             }
 
-            if (this.props.id !== prevProps.id) {
+            // id set by DV app, style works in dashboards
+            if (this.props.id !== prevProps.id || !isEqual(this.props.style, prevProps.style)) {
                 this.recreateChart(0); // disable animation
                 return;
             }
