@@ -6,13 +6,13 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import LoadingMask from '../widgets/LoadingMask';
 import ChartPlugin from '../ChartPlugin';
-import * as chartsApi from 'd2-charts-api';
+import * as analytics from '@dhis2/analytics';
 import * as api from '../api/analytics';
 import * as apiViz from '../api/visualization';
 import * as options from '../modules/options';
 import { YEAR_OVER_YEAR_LINE, COLUMN } from '../modules/chartTypes';
 
-jest.mock('d2-charts-api');
+jest.mock('@dhis2/analytics');
 
 var dxMock = {
     dimension: 'dx',
@@ -82,8 +82,8 @@ var MockYoYAnalyticsResponse = function MockYoYAnalyticsResponse() {
     };
 };
 
-var createChartMock = {
-    chart: {
+var createVisualizationMock = {
+    visualization: {
         getSVGForExport: function getSVGForExport() {
             return '<svg />';
         }
@@ -127,9 +127,9 @@ describe('ChartPlugin', function () {
         expect(canvas().find(LoadingMask).exists()).toBeTruthy();
     });
 
-    describe('createChart success', function () {
+    describe('createVisualization success', function () {
         beforeEach(function () {
-            chartsApi.createChart = jest.fn().mockReturnValue(createChartMock);
+            analytics.createVisualization = jest.fn().mockReturnValue(createVisualizationMock);
         });
 
         it('renders a div', function (done) {
@@ -142,11 +142,11 @@ describe('ChartPlugin', function () {
             done();
         });
 
-        it('calls createChart', function (done) {
+        it('calls createVisualization', function (done) {
             canvas();
 
             setTimeout(function () {
-                expect(chartsApi.createChart).toHaveBeenCalled();
+                expect(analytics.createVisualization).toHaveBeenCalled();
                 done();
             });
         });
@@ -200,7 +200,7 @@ describe('ChartPlugin', function () {
 
             setTimeout(function () {
                 expect(props.onChartGenerated).toHaveBeenCalled();
-                expect(props.onChartGenerated).toHaveBeenCalledWith(createChartMock.chart.getSVGForExport());
+                expect(props.onChartGenerated).toHaveBeenCalledWith(createVisualizationMock.visualization.getSVGForExport());
                 done();
             });
         });
@@ -252,18 +252,18 @@ describe('ChartPlugin', function () {
                 });
             });
 
-            it('provides extra options to createChart', function (done) {
+            it('provides extra options to createVisualization', function (done) {
                 canvas();
 
                 setTimeout(function () {
-                    expect(chartsApi.createChart).toHaveBeenCalled();
+                    expect(analytics.createVisualization).toHaveBeenCalled();
 
                     var expectedExtraOptions = {
                         yearlySeries: mockYoYSeriesLabels,
                         xAxisLabels: ['period 1', 'period 2']
                     };
 
-                    expect(chartsApi.createChart.mock.calls[0][3]).toEqual(_extends({
+                    expect(analytics.createVisualization.mock.calls[0][3]).toEqual(_extends({
                         animation: undefined,
                         dashboard: false
                     }, expectedExtraOptions));

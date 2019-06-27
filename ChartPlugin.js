@@ -15,7 +15,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import isEqual from 'lodash-es/isEqual';
-import { createChart } from 'd2-charts-api';
+import { createVisualization } from '@dhis2/analytics';
 
 import { apiFetchVisualization } from './api/visualization';
 import { apiFetchAnalytics, apiFetchAnalyticsForYearOverYear } from './api/analytics';
@@ -37,7 +37,7 @@ var ChartPlugin = function (_Component) {
 
         _this.canvasRef = React.createRef();
 
-        _this.recreateChart = Function.prototype;
+        _this.recreateVisualization = Function.prototype;
 
         _this.state = {
             isLoading: true
@@ -65,7 +65,7 @@ var ChartPlugin = function (_Component) {
 
             // id set by DV app, style works in dashboards
             if (this.props.id !== prevProps.id || !isEqual(this.props.style, prevProps.style)) {
-                this.recreateChart(0); // disable animation
+                this.recreateVisualization(0); // disable animation
                 return;
             }
         }
@@ -188,18 +188,18 @@ var _initialiseProps = function _initialiseProps() {
                             onResponsesReceived(responses);
                         }
 
-                        _this2.recreateChart = function (animation) {
-                            var chartConfig = createChart(responses, visualization, _this2.canvasRef.current, _extends({}, extraOptions, {
+                        _this2.recreateVisualization = function (animation) {
+                            var visualizationConfig = createVisualization(responses, visualization, _this2.canvasRef.current, _extends({}, extraOptions, {
                                 animation: animation
                             }));
 
-                            onChartGenerated(chartConfig.chart.getSVGForExport({
+                            onChartGenerated(visualizationConfig.visualization.getSVGForExport({
                                 sourceHeight: 768,
                                 sourceWidth: 1024
                             }));
                         };
 
-                        _this2.recreateChart();
+                        _this2.recreateVisualization();
 
                         _this2.setState({ isLoading: false });
                         _context.next = 36;
