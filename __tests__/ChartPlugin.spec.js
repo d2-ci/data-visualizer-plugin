@@ -267,7 +267,8 @@ describe('ChartPlugin', function () {
 
                     var expectedExtraOptions = {
                         yearlySeries: mockYoYSeriesLabels,
-                        xAxisLabels: ['period 1', 'period 2']
+                        xAxisLabels: ['period 1', 'period 2'],
+                        noData: { text: 'No data' }
                     };
 
                     expect(analytics.createVisualization.mock.calls[0][3]).toEqual(_extends({

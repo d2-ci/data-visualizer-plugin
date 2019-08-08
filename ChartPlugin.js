@@ -15,6 +15,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import isEqual from 'lodash-es/isEqual';
+import i18n from '@dhis2/d2-i18n';
 import { createVisualization } from '@dhis2/analytics';
 
 import { apiFetchVisualization } from './api/visualization';
@@ -152,7 +153,10 @@ var _initialiseProps = function _initialiseProps() {
                     case 9:
                         visualization = _context.t0;
                         options = _this2.getRequestOptions(visualization, filters);
-                        extraOptions = { dashboard: forDashboard };
+                        extraOptions = {
+                            dashboard: forDashboard,
+                            noData: { text: i18n.t('No data') }
+                        };
                         responses = [];
 
                         if (!isYearOverYear(visualization.type)) {
