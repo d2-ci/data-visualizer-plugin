@@ -15,11 +15,12 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import isEqual from 'lodash-es/isEqual';
+import i18n from '@dhis2/d2-i18n';
 import { createVisualization } from '@dhis2/analytics';
 
 import { apiFetchVisualization } from './api/visualization';
 import { apiFetchAnalytics, apiFetchAnalyticsForYearOverYear } from './api/analytics';
-import { isYearOverYear } from './modules/chartTypes';
+import { isYearOverYear, isSingleValue } from './modules/chartTypes';
 import { getOptionsForRequest } from './modules/options';
 import { computeGenericPeriodNames } from './modules/analytics';
 import { BASE_FIELD_YEARLY_SERIES } from './modules/fields/baseFields';
@@ -152,7 +153,10 @@ var _initialiseProps = function _initialiseProps() {
                     case 9:
                         visualization = _context.t0;
                         options = _this2.getRequestOptions(visualization, filters);
-                        extraOptions = { dashboard: forDashboard };
+                        extraOptions = {
+                            dashboard: forDashboard,
+                            noData: { text: i18n.t('No data') }
+                        };
                         responses = [];
 
                         if (!isYearOverYear(visualization.type)) {
@@ -191,12 +195,17 @@ var _initialiseProps = function _initialiseProps() {
                         _this2.recreateVisualization = function (animation) {
                             var visualizationConfig = createVisualization(responses, visualization, _this2.canvasRef.current, _extends({}, extraOptions, {
                                 animation: animation
-                            }));
+                            }), undefined, undefined, isSingleValue(visualization.type) ? 'dhis' : 'highcharts' // output format
+                            );
 
-                            onChartGenerated(visualizationConfig.visualization.getSVGForExport({
-                                sourceHeight: 768,
-                                sourceWidth: 1024
-                            }));
+                            if (isSingleValue(visualization.type)) {
+                                onChartGenerated(visualizationConfig.visualization);
+                            } else {
+                                onChartGenerated(visualizationConfig.visualization.getSVGForExport({
+                                    sourceHeight: 768,
+                                    sourceWidth: 1024
+                                }));
+                            }
                         };
 
                         _this2.recreateVisualization();

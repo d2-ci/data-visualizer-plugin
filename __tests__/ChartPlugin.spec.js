@@ -10,7 +10,7 @@ import * as analytics from '@dhis2/analytics';
 import * as api from '../api/analytics';
 import * as apiViz from '../api/visualization';
 import * as options from '../modules/options';
-import { YEAR_OVER_YEAR_LINE, COLUMN } from '../modules/chartTypes';
+import { YEAR_OVER_YEAR_LINE, COLUMN, SINGLE_VALUE } from '../modules/chartTypes';
 
 jest.mock('@dhis2/analytics');
 
@@ -47,6 +47,13 @@ var yearOverYearCurrentMock = {
     columns: [dxMock],
     rows: [peMock],
     yearlySeries: ['LAST_YEAR']
+};
+
+var singleValueCurrentMock = {
+    type: SINGLE_VALUE,
+    columns: [dxMock],
+    rows: [],
+    filters: [ouMock, peMock]
 };
 
 var metaDataMock = {
@@ -260,13 +267,32 @@ describe('ChartPlugin', function () {
 
                     var expectedExtraOptions = {
                         yearlySeries: mockYoYSeriesLabels,
-                        xAxisLabels: ['period 1', 'period 2']
+                        xAxisLabels: ['period 1', 'period 2'],
+                        noData: { text: 'No data' }
                     };
 
                     expect(analytics.createVisualization.mock.calls[0][3]).toEqual(_extends({
                         animation: undefined,
                         dashboard: false
                     }, expectedExtraOptions));
+
+                    done();
+                });
+            });
+        });
+
+        describe('Single value visualization', function () {
+            beforeEach(function () {
+                props.config = _extends({}, singleValueCurrentMock);
+            });
+
+            it('provides dhis as output format to createChart', function (done) {
+                canvas();
+
+                setTimeout(function () {
+                    expect(analytics.createVisualization).toHaveBeenCalled();
+
+                    expect(analytics.createVisualization.mock.calls[0][6]).toEqual('dhis');
 
                     done();
                 });
