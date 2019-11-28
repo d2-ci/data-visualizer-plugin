@@ -1,6 +1,8 @@
 /* eslint-disable */
 'use strict';
 
+Object.defineProperty(exports, '__esModule', { value: true });
+
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var React = require('react');
@@ -863,6 +865,12 @@ var isYearOverYear = function isYearOverYear(type) {
 var isSingleValue = function isSingleValue(type) {
   return type === SINGLE_VALUE;
 };
+var chartTypes = {
+  YEAR_OVER_YEAR_LINE: YEAR_OVER_YEAR_LINE,
+  YEAR_OVER_YEAR_COLUMN: YEAR_OVER_YEAR_COLUMN,
+  SINGLE_VALUE: SINGLE_VALUE,
+  PIVOT_TABLE: PIVOT_TABLE
+};
 
 var PivotPlugin =
 /*#__PURE__*/
@@ -1092,5 +1100,6 @@ var VisualizationPlugin = function VisualizationPlugin(props) {
   }
 };
 
-module.exports = VisualizationPlugin;
+exports.chartTypes = chartTypes;
+exports.default = VisualizationPlugin;
 //# sourceMappingURL=lib.js.map

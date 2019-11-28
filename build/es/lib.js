@@ -858,6 +858,12 @@ var isYearOverYear = function isYearOverYear(type) {
 var isSingleValue = function isSingleValue(type) {
   return type === SINGLE_VALUE;
 };
+var chartTypes = {
+  YEAR_OVER_YEAR_LINE: YEAR_OVER_YEAR_LINE,
+  YEAR_OVER_YEAR_COLUMN: YEAR_OVER_YEAR_COLUMN,
+  SINGLE_VALUE: SINGLE_VALUE,
+  PIVOT_TABLE: PIVOT_TABLE
+};
 
 var PivotPlugin =
 /*#__PURE__*/
@@ -1088,4 +1094,5 @@ var VisualizationPlugin = function VisualizationPlugin(props) {
 };
 
 export default VisualizationPlugin;
+export { chartTypes };
 //# sourceMappingURL=lib.js.map
