@@ -1,16 +1,14 @@
 /* eslint-disable */
 'use strict';
 
-Object.defineProperty(exports, '__esModule', { value: true });
-
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var React = require('react');
 var React__default = _interopDefault(React);
+var analytics = require('@dhis2/analytics');
 var PropTypes = _interopDefault(require('prop-types'));
 var isEqual = _interopDefault(require('lodash-es/isEqual'));
 var i18n = _interopDefault(require('@dhis2/d2-i18n'));
-var analytics = require('@dhis2/analytics');
 require('lodash-es/pick');
 var styles$1 = require('@material-ui/core/styles');
 var CircularProgress = _interopDefault(require('@material-ui/core/CircularProgress'));
@@ -854,24 +852,6 @@ ChartPlugin.propTypes = {
   onResponsesReceived: PropTypes.func
 };
 
-var YEAR_OVER_YEAR_LINE = 'YEAR_OVER_YEAR_LINE';
-var YEAR_OVER_YEAR_COLUMN = 'YEAR_OVER_YEAR_COLUMN';
-var SINGLE_VALUE = 'SINGLE_VALUE';
-var PIVOT_TABLE = 'PIVOT_TABLE';
-var yearOverYearTypes = [YEAR_OVER_YEAR_LINE, YEAR_OVER_YEAR_COLUMN];
-var isYearOverYear = function isYearOverYear(type) {
-  return yearOverYearTypes.includes(type);
-};
-var isSingleValue = function isSingleValue(type) {
-  return type === SINGLE_VALUE;
-};
-var chartTypes = {
-  YEAR_OVER_YEAR_LINE: YEAR_OVER_YEAR_LINE,
-  YEAR_OVER_YEAR_COLUMN: YEAR_OVER_YEAR_COLUMN,
-  SINGLE_VALUE: SINGLE_VALUE,
-  PIVOT_TABLE: PIVOT_TABLE
-};
-
 var PivotPlugin =
 /*#__PURE__*/
 function (_Component) {
@@ -955,7 +935,7 @@ function (_Component) {
               };
               responses = [];
 
-              if (!isYearOverYear(visualization.type)) {
+              if (!analytics.isYearOverYear(visualization.type)) {
                 _context.next = 24;
                 break;
               }
@@ -988,10 +968,10 @@ function (_Component) {
               _this.recreateVisualization = function (animation) {
                 var visualizationConfig = analytics.createVisualization(responses, visualization, _this.canvasRef.current, _objectSpread2({}, extraOptions, {
                   animation: animation
-                }), undefined, undefined, isSingleValue(visualization.type) ? 'dhis' : 'highcharts' // output format
+                }), undefined, undefined, analytics.isSingleValue(visualization.type) ? 'dhis' : 'highcharts' // output format
                 );
 
-                if (isSingleValue(visualization.type)) {
+                if (analytics.isSingleValue(visualization.type)) {
                   onChartGenerated(visualizationConfig.visualization);
                 } else {
                   onChartGenerated(visualizationConfig.visualization.getSVGForExport({
@@ -1080,26 +1060,25 @@ PivotPlugin.defaultProps = {
   onResponsesReceived: Function.prototype
 };
 PivotPlugin.propTypes = {
-  id: PropTypes.number,
-  d2: PropTypes.object.isRequired,
-  animation: PropTypes.number,
   config: PropTypes.object.isRequired,
+  d2: PropTypes.object.isRequired,
+  onError: PropTypes.func.isRequired,
+  animation: PropTypes.number,
   filters: PropTypes.object,
   forDashboard: PropTypes.bool,
+  id: PropTypes.number,
   style: PropTypes.object,
-  onError: PropTypes.func.isRequired,
   onChartGenerated: PropTypes.func,
   onResponsesReceived: PropTypes.func
 };
 
 var VisualizationPlugin = function VisualizationPlugin(props) {
-  if (!props.config.type || props.config.type === PIVOT_TABLE) {
+  if (!props.config.type || props.config.type === analytics.VIS_TYPE_PIVOT_TABLE) {
     return React__default.createElement(PivotPlugin, props);
   } else {
     return React__default.createElement(ChartPlugin, props);
   }
 };
 
-exports.chartTypes = chartTypes;
-exports.default = VisualizationPlugin;
+module.exports = VisualizationPlugin;
 //# sourceMappingURL=lib.js.map

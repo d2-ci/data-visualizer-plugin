@@ -1,9 +1,9 @@
 /* eslint-disable */
 import React, { Fragment, Component } from 'react';
+import { createVisualization, isSingleValue, isYearOverYear, VIS_TYPE_PIVOT_TABLE } from '@dhis2/analytics';
 import PropTypes from 'prop-types';
 import isEqual from 'lodash-es/isEqual';
 import i18n from '@dhis2/d2-i18n';
-import { createVisualization, isSingleValue as isSingleValue$1, isYearOverYear as isYearOverYear$1 } from '@dhis2/analytics';
 import 'lodash-es/pick';
 import { withStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -710,7 +710,7 @@ function (_Component) {
               };
               responses = [];
 
-              if (!isYearOverYear$1(visualization.type)) {
+              if (!isYearOverYear(visualization.type)) {
                 _context.next = 24;
                 break;
               }
@@ -743,10 +743,10 @@ function (_Component) {
               _this.recreateVisualization = function (animation) {
                 var visualizationConfig = createVisualization(responses, visualization, _this.canvasRef.current, _objectSpread2({}, extraOptions, {
                   animation: animation
-                }), undefined, undefined, isSingleValue$1(visualization.type) ? 'dhis' : 'highcharts' // output format
+                }), undefined, undefined, isSingleValue(visualization.type) ? 'dhis' : 'highcharts' // output format
                 );
 
-                if (isSingleValue$1(visualization.type)) {
+                if (isSingleValue(visualization.type)) {
                   onChartGenerated(visualizationConfig.visualization);
                 } else {
                   onChartGenerated(visualizationConfig.visualization.getSVGForExport({
@@ -845,24 +845,6 @@ ChartPlugin.propTypes = {
   onError: PropTypes.func.isRequired,
   onChartGenerated: PropTypes.func,
   onResponsesReceived: PropTypes.func
-};
-
-var YEAR_OVER_YEAR_LINE = 'YEAR_OVER_YEAR_LINE';
-var YEAR_OVER_YEAR_COLUMN = 'YEAR_OVER_YEAR_COLUMN';
-var SINGLE_VALUE = 'SINGLE_VALUE';
-var PIVOT_TABLE = 'PIVOT_TABLE';
-var yearOverYearTypes = [YEAR_OVER_YEAR_LINE, YEAR_OVER_YEAR_COLUMN];
-var isYearOverYear = function isYearOverYear(type) {
-  return yearOverYearTypes.includes(type);
-};
-var isSingleValue = function isSingleValue(type) {
-  return type === SINGLE_VALUE;
-};
-var chartTypes = {
-  YEAR_OVER_YEAR_LINE: YEAR_OVER_YEAR_LINE,
-  YEAR_OVER_YEAR_COLUMN: YEAR_OVER_YEAR_COLUMN,
-  SINGLE_VALUE: SINGLE_VALUE,
-  PIVOT_TABLE: PIVOT_TABLE
 };
 
 var PivotPlugin =
@@ -1073,20 +1055,20 @@ PivotPlugin.defaultProps = {
   onResponsesReceived: Function.prototype
 };
 PivotPlugin.propTypes = {
-  id: PropTypes.number,
-  d2: PropTypes.object.isRequired,
-  animation: PropTypes.number,
   config: PropTypes.object.isRequired,
+  d2: PropTypes.object.isRequired,
+  onError: PropTypes.func.isRequired,
+  animation: PropTypes.number,
   filters: PropTypes.object,
   forDashboard: PropTypes.bool,
+  id: PropTypes.number,
   style: PropTypes.object,
-  onError: PropTypes.func.isRequired,
   onChartGenerated: PropTypes.func,
   onResponsesReceived: PropTypes.func
 };
 
 var VisualizationPlugin = function VisualizationPlugin(props) {
-  if (!props.config.type || props.config.type === PIVOT_TABLE) {
+  if (!props.config.type || props.config.type === VIS_TYPE_PIVOT_TABLE) {
     return React.createElement(PivotPlugin, props);
   } else {
     return React.createElement(ChartPlugin, props);
@@ -1094,5 +1076,4 @@ var VisualizationPlugin = function VisualizationPlugin(props) {
 };
 
 export default VisualizationPlugin;
-export { chartTypes };
 //# sourceMappingURL=lib.js.map
