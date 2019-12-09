@@ -351,6 +351,8 @@ var extractName = function extractName(propObj) {
 var markExcluded = function markExcluded(fieldObj) {
   return fieldObj.excluded === true ? _objectSpread2({}, fieldObj, _defineProperty({}, BASE_FIELD_NAME, "!".concat(fieldObj[BASE_FIELD_NAME]))) : fieldObj;
 };
+/* eslint-disable-next-line max-params */
+
 var moveExcludedToEnd = function moveExcludedToEnd(acc, current, curIndex, array) {
   !acc && (acc = array.slice());
   current.charAt(0) === '!' && acc.push(acc.shift());
@@ -570,13 +572,10 @@ var options = {
 
 };
 var getOptionsForRequest = function getOptionsForRequest() {
-  return Object.entries(options).filter(function (_ref3) {
-    var _ref4 = _slicedToArray(_ref3, 2),
-        option = _ref4[0],
-        props = _ref4[1];
-
-    return props.requestable;
-  });
+  return Object.entries(options).filter(function (entry) {
+    return entry[1].requestable;
+  } // entry = [option, props]
+  );
 };
 
 var computeGenericPeriodNames = function computeGenericPeriodNames(responses) {
@@ -745,7 +744,8 @@ function (_Component) {
                 onResponsesReceived(responses);
               }
 
-              _this.recreateVisualization = function (animation) {
+              _this.recreateVisualization = function () {
+                var animation = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this.props.animation;
                 var visualizationConfig = analytics.createVisualization(responses, visualization, _this.canvasRef.current, _objectSpread2({}, extraOptions, {
                   animation: animation
                 }), undefined, undefined, analytics.isSingleValue(visualization.type) ? 'dhis' : 'highcharts' // output format
@@ -965,7 +965,8 @@ function (_Component) {
                 onResponsesReceived(responses);
               }
 
-              _this.recreateVisualization = function (animation) {
+              _this.recreateVisualization = function () {
+                var animation = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this.props.animation;
                 var visualizationConfig = analytics.createVisualization(responses, visualization, _this.canvasRef.current, _objectSpread2({}, extraOptions, {
                   animation: animation
                 }), undefined, undefined, analytics.isSingleValue(visualization.type) ? 'dhis' : 'highcharts' // output format
