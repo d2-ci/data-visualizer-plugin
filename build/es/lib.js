@@ -346,6 +346,8 @@ var extractName = function extractName(propObj) {
 var markExcluded = function markExcluded(fieldObj) {
   return fieldObj.excluded === true ? _objectSpread2({}, fieldObj, _defineProperty({}, BASE_FIELD_NAME, "!".concat(fieldObj[BASE_FIELD_NAME]))) : fieldObj;
 };
+/* eslint-disable-next-line max-params */
+
 var moveExcludedToEnd = function moveExcludedToEnd(acc, current, curIndex, array) {
   !acc && (acc = array.slice());
   current.charAt(0) === '!' && acc.push(acc.shift());
@@ -737,7 +739,8 @@ function (_Component) {
                 onResponsesReceived(responses);
               }
 
-              _this.recreateVisualization = function (animation) {
+              _this.recreateVisualization = function () {
+                var animation = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this.props.animation;
                 var visualizationConfig = createVisualization(responses, visualization, _this.canvasRef.current, _objectSpread2({}, extraOptions, {
                   animation: animation
                 }), undefined, undefined, isSingleValue(visualization.type) ? 'dhis' : 'highcharts' // output format
@@ -832,14 +835,14 @@ ChartPlugin.defaultProps = {
   onResponsesReceived: Function.prototype
 };
 ChartPlugin.propTypes = {
-  id: PropTypes.number,
-  d2: PropTypes.object.isRequired,
-  animation: PropTypes.number,
   config: PropTypes.object.isRequired,
+  d2: PropTypes.object.isRequired,
+  onError: PropTypes.func.isRequired,
+  animation: PropTypes.number,
   filters: PropTypes.object,
   forDashboard: PropTypes.bool,
+  id: PropTypes.number,
   style: PropTypes.object,
-  onError: PropTypes.func.isRequired,
   onChartGenerated: PropTypes.func,
   onResponsesReceived: PropTypes.func
 };
@@ -957,7 +960,8 @@ function (_Component) {
                 onResponsesReceived(responses);
               }
 
-              _this.recreateVisualization = function (animation) {
+              _this.recreateVisualization = function () {
+                var animation = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this.props.animation;
                 var visualizationConfig = createVisualization(responses, visualization, _this.canvasRef.current, _objectSpread2({}, extraOptions, {
                   animation: animation
                 }), undefined, undefined, isSingleValue(visualization.type) ? 'dhis' : 'highcharts' // output format
