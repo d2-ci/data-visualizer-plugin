@@ -840,14 +840,14 @@ ChartPlugin.defaultProps = {
   onResponsesReceived: Function.prototype
 };
 ChartPlugin.propTypes = {
-  id: PropTypes.number,
-  d2: PropTypes.object.isRequired,
-  animation: PropTypes.number,
   config: PropTypes.object.isRequired,
+  d2: PropTypes.object.isRequired,
+  onError: PropTypes.func.isRequired,
+  animation: PropTypes.number,
   filters: PropTypes.object,
   forDashboard: PropTypes.bool,
+  id: PropTypes.number,
   style: PropTypes.object,
-  onError: PropTypes.func.isRequired,
   onChartGenerated: PropTypes.func,
   onResponsesReceived: PropTypes.func
 };
