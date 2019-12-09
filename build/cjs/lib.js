@@ -570,13 +570,10 @@ var options = {
 
 };
 var getOptionsForRequest = function getOptionsForRequest() {
-  return Object.entries(options).filter(function (_ref3) {
-    var _ref4 = _slicedToArray(_ref3, 2),
-        option = _ref4[0],
-        props = _ref4[1];
-
-    return props.requestable;
-  });
+  return Object.entries(options).filter(function (entry) {
+    return entry[1].requestable;
+  } // entry = [option, props]
+  );
 };
 
 var computeGenericPeriodNames = function computeGenericPeriodNames(responses) {
