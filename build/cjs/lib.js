@@ -904,13 +904,13 @@ function (_Component) {
     });
 
     _defineProperty(_assertThisInitialized(_this), "renderTable", function _callee() {
-      var _this$props, config, filters, forDashboard, onResponsesReceived, onError, i18nManager, appManager, uiManager, d2aOptionConfig, refs, visualization, options, responses;
+      var _this$props, config, filters, onResponsesReceived, onError, i18nManager, appManager, uiManager, d2aOptionConfig, refs, visualization, options, responses;
 
       return regeneratorRuntime.async(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              _this$props = _this.props, config = _this$props.config, filters = _this$props.filters, forDashboard = _this$props.forDashboard, onResponsesReceived = _this$props.onResponsesReceived, onError = _this$props.onError;
+              _this$props = _this.props, config = _this$props.config, filters = _this$props.filters, onResponsesReceived = _this$props.onResponsesReceived, onError = _this$props.onError;
               i18nManager = {
                 get: function get(string) {
                   return i18n.t(string);
@@ -1060,7 +1060,6 @@ function (_Component) {
 PivotPlugin.defaultProps = {
   config: {},
   filters: {},
-  forDashboard: false,
   style: {},
   animation: 200,
   onError: Function.prototype,
@@ -1071,7 +1070,6 @@ PivotPlugin.propTypes = {
   d2: PropTypes.object.isRequired,
   onError: PropTypes.func.isRequired,
   filters: PropTypes.object,
-  forDashboard: PropTypes.bool,
   id: PropTypes.number,
   style: PropTypes.object,
   onResponsesReceived: PropTypes.func
