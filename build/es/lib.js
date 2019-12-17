@@ -7,6 +7,8 @@ import i18n from '@dhis2/d2-i18n';
 import 'lodash-es/pick';
 import { withStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import _JSXStyle from 'styled-jsx/style';
+import { Layout, table, Response, config, api } from 'd2-analysis';
 
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -847,6 +849,9 @@ ChartPlugin.propTypes = {
   onResponsesReceived: PropTypes.func
 };
 
+var pivotTableStyles = [".pivot td{border:1px solid #b2b2b2;padding:5px;}", ".pivot-empty{background-color:#cddaed;}", ".pivot-dim{background-color:#dae6f8;text-align:center;}", ".pivot-dim-total{background-color:#bac6d8;text-align:center;}", ".pivot-value{background-color:#fff;text-align:right;}", ".pivot-value-total-subgrandtotal{background-color:#d8d8d8;white-space:nowrap;text-align:right;}", ".pointer{cursor:pointer;}"];
+pivotTableStyles.__hash = "3856634977";
+
 var PivotPlugin =
 /*#__PURE__*/
 function (_Component) {
@@ -890,91 +895,90 @@ function (_Component) {
     });
 
     _defineProperty(_assertThisInitialized(_this), "getConfigById", function (id) {
-      return apiFetchVisualization(_this.props.d2, 'chart', id);
+      return apiFetchVisualization(_this.props.d2, 'reportTable', id);
     });
 
-    _defineProperty(_assertThisInitialized(_this), "renderChart", function _callee() {
-      var _this$props, config, filters, forDashboard, onResponsesReceived, onChartGenerated, onError, visualization, options, extraOptions, responses, yearlySeriesLabels, _ref3;
+    _defineProperty(_assertThisInitialized(_this), "renderTable", function _callee() {
+      var _this$props, config$1, filters, onResponsesReceived, onError, i18nManager, appManager, uiManager, d2aOptionConfig, refs, visualization, options, responses;
 
       return regeneratorRuntime.async(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              _this$props = _this.props, config = _this$props.config, filters = _this$props.filters, forDashboard = _this$props.forDashboard, onResponsesReceived = _this$props.onResponsesReceived, onChartGenerated = _this$props.onChartGenerated, onError = _this$props.onError;
-              _context.prev = 1;
-
-              if (!(Object.keys(config).length === 1 && config.id)) {
-                _context.next = 8;
-                break;
-              }
-
-              _context.next = 5;
-              return regeneratorRuntime.awrap(_this.getConfigById(config.id));
-
-            case 5:
-              _context.t0 = _context.sent;
-              _context.next = 9;
-              break;
-
-            case 8:
-              _context.t0 = config;
-
-            case 9:
-              visualization = _context.t0;
-              options = _this.getRequestOptions(visualization, filters);
-              extraOptions = {
-                dashboard: forDashboard,
-                noData: {
-                  text: i18n.t('No data')
+              _this$props = _this.props, config$1 = _this$props.config, filters = _this$props.filters, onResponsesReceived = _this$props.onResponsesReceived, onError = _this$props.onError;
+              i18nManager = {
+                get: function get(string) {
+                  return i18n.t(string);
                 }
               };
-              responses = [];
+              appManager = {
+                getLegendSetById: function getLegendSetById() {
+                  return '';
+                },
+                getApiPath: function getApiPath() {
+                  return '';
+                }
+              };
+              uiManager = {};
+              d2aOptionConfig = new config.OptionConfig();
+              d2aOptionConfig.setI18nManager(i18nManager);
+              d2aOptionConfig.init();
+              refs = {
+                api: api,
+                appManager: appManager,
+                uiManager: uiManager,
+                i18nManager: i18nManager,
+                optionConfig: d2aOptionConfig
+              };
+              _context.prev = 8;
 
-              if (!isYearOverYear(visualization.type)) {
-                _context.next = 24;
+              if (!(Object.keys(config$1).length === 1 && config$1.id)) {
+                _context.next = 15;
                 break;
               }
 
-              yearlySeriesLabels = [];
-              _context.next = 17;
-              return regeneratorRuntime.awrap(apiFetchAnalyticsForYearOverYear(_this.props.d2, visualization, options));
+              _context.next = 12;
+              return regeneratorRuntime.awrap(_this.getConfigById(config$1.id));
 
-            case 17:
-              _ref3 = _context.sent;
-              responses = _ref3.responses;
-              yearlySeriesLabels = _ref3.yearlySeriesLabels;
-              extraOptions[BASE_FIELD_YEARLY_SERIES] = yearlySeriesLabels;
-              extraOptions.xAxisLabels = computeGenericPeriodNames(responses);
-              _context.next = 27;
+            case 12:
+              _context.t0 = _context.sent;
+              _context.next = 16;
               break;
 
-            case 24:
-              _context.next = 26;
+            case 15:
+              _context.t0 = config$1;
+
+            case 16:
+              visualization = _context.t0;
+              options = _this.getRequestOptions(visualization, filters);
+              _context.next = 20;
               return regeneratorRuntime.awrap(apiFetchAnalytics(_this.props.d2, visualization, options));
 
-            case 26:
+            case 20:
               responses = _context.sent;
 
-            case 27:
               if (responses.length) {
                 onResponsesReceived(responses);
               }
 
               _this.recreateVisualization = function () {
-                var animation = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this.props.animation;
-                var visualizationConfig = createVisualization(responses, visualization, _this.canvasRef.current, _objectSpread2({}, extraOptions, {
-                  animation: animation
-                }), undefined, undefined, isSingleValue(visualization.type) ? 'dhis' : 'highcharts' // output format
-                );
+                var remappedOptions = {
+                  showColTotals: visualization.colTotals,
+                  showRowTotals: visualization.rowTotals,
+                  showColSubTotals: visualization.colSubTotals,
+                  showRowSubTotals: visualization.rowSubTotals,
+                  numberType: visualization.numberType || 'VALUE' // TODO read default from options, perhaps better idea is to compute layout content in app
 
-                if (isSingleValue(visualization.type)) {
-                  onChartGenerated(visualizationConfig.visualization);
-                } else {
-                  onChartGenerated(visualizationConfig.visualization.getSVGForExport({
-                    sourceHeight: 768,
-                    sourceWidth: 1024
-                  }));
-                }
+                };
+                var layout = new Layout(refs, visualization, remappedOptions);
+                var extraOptions = {
+                  renderLimit: 100000,
+                  trueTotals: true
+                };
+                var pivotTable = new table.PivotTable(refs, layout, new Response(refs, responses[0].response), extraOptions);
+                pivotTable.initialize();
+                pivotTable.build();
+                _this.canvasRef.current.innerHTML = pivotTable.render();
               };
 
               _this.recreateVisualization();
@@ -983,20 +987,20 @@ function (_Component) {
                 isLoading: false
               });
 
-              _context.next = 36;
+              _context.next = 30;
               break;
 
-            case 33:
-              _context.prev = 33;
-              _context.t1 = _context["catch"](1);
+            case 27:
+              _context.prev = 27;
+              _context.t1 = _context["catch"](8);
               onError(_context.t1);
 
-            case 36:
+            case 30:
             case "end":
               return _context.stop();
           }
         }
-      }, null, null, [[1, 33]]);
+      }, null, null, [[8, 27]]);
     });
 
     _this.canvasRef = React.createRef();
@@ -1010,18 +1014,18 @@ function (_Component) {
   _createClass(PivotPlugin, [{
     key: "componentDidMount",
     value: function componentDidMount() {
-      this.renderChart();
+      this.renderTable();
     }
   }, {
     key: "componentDidUpdate",
     value: function componentDidUpdate(prevProps) {
       if (!isEqual(this.props.config, prevProps.config)) {
-        this.renderChart();
+        this.renderTable();
         return;
       }
 
       if (!isEqual(this.props.filters, prevProps.filters)) {
-        this.renderChart();
+        this.renderTable();
         return;
       } // id set by DV app, style works in dashboards
 
@@ -1037,8 +1041,11 @@ function (_Component) {
     value: function render() {
       return React.createElement(Fragment, null, this.state.isLoading ? React.createElement(LoadingMask, null) : null, React.createElement("div", {
         ref: this.canvasRef,
-        style: this.props.style
-      }));
+        style: this.props.style,
+        className: "jsx-".concat(pivotTableStyles.__hash)
+      }, React.createElement(_JSXStyle, {
+        id: pivotTableStyles.__hash
+      }, pivotTableStyles)));
     }
   }]);
 
@@ -1048,23 +1055,18 @@ function (_Component) {
 PivotPlugin.defaultProps = {
   config: {},
   filters: {},
-  forDashboard: false,
   style: {},
   animation: 200,
   onError: Function.prototype,
-  onChartGenerated: Function.prototype,
   onResponsesReceived: Function.prototype
 };
 PivotPlugin.propTypes = {
   config: PropTypes.object.isRequired,
   d2: PropTypes.object.isRequired,
   onError: PropTypes.func.isRequired,
-  animation: PropTypes.number,
   filters: PropTypes.object,
-  forDashboard: PropTypes.bool,
   id: PropTypes.number,
   style: PropTypes.object,
-  onChartGenerated: PropTypes.func,
   onResponsesReceived: PropTypes.func
 };
 
