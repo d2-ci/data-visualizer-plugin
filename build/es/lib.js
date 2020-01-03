@@ -326,7 +326,7 @@ var options = {
     requestable: false
   },
   sortOrder: {
-    defaultValue: 0,
+    defaultValue: '0',
     requestable: false
   },
   subtitle: {
@@ -336,8 +336,103 @@ var options = {
   title: {
     defaultValue: undefined,
     requestable: false
-  } // topLimit
-
+  },
+  // only for PT XXX
+  colTotals: {
+    defaultValue: false,
+    requestable: false
+  },
+  colSubTotals: {
+    defaultValue: false,
+    requestable: false
+  },
+  rowTotals: {
+    defaultValue: false,
+    requestable: false
+  },
+  rowSubTotals: {
+    defaultValue: false,
+    requestable: false
+  },
+  showDimensionLabels: {
+    defaultValue: false,
+    requestable: false
+  },
+  hideEmptyColumns: {
+    defaultValue: false,
+    requestable: true
+  },
+  hideEmptyRows: {
+    defaultValue: false,
+    requestable: true
+  },
+  skipRounding: {
+    defaultValue: false,
+    requestable: true
+  },
+  numberType: {
+    defaultValue: 'VALUE',
+    requestable: false
+  },
+  showHierarchy: {
+    defaultValue: false,
+    requestable: true
+  },
+  legendSet: {
+    defaultValue: 'NONE',
+    requestable: false
+  },
+  // XXX can be 'BY_DATA_ITEM'
+  legendDisplayStyle: {
+    defaultValue: 'FILL',
+    requestable: false
+  },
+  displayDensity: {
+    defaultValue: 'NORMAL',
+    requestable: false
+  },
+  fontSize: {
+    defaultValue: 'NORMAL',
+    requestable: false
+  },
+  digitGroupSeparator: {
+    defaultValue: 'SPACE',
+    requestable: false
+  },
+  // XXX these are stored in the AO under reportParams
+  paramReportingPeriod: {
+    defaultValue: false,
+    requestable: false
+  },
+  paramOrganisationUnit: {
+    defaultValue: false,
+    requestable: false
+  },
+  paramParentOrganisationUnit: {
+    defaultValue: false,
+    requestable: false
+  },
+  // XXX not in UI
+  paramGrandParentOrganisationUnit: {
+    defaultValue: false,
+    requestable: false
+  },
+  regression: {
+    defaultValue: false,
+    requestable: false
+  },
+  cumulative: {
+    defaultValue: false,
+    requestable: false
+  },
+  measureCriteria: {
+    defaultValue: undefined,
+    requestable: true
+  },
+  topLimit: {
+    defaultValue: '0',
+    requestable: false
+  }
 };
 var getOptionsForRequest = function getOptionsForRequest() {
   return Object.entries(options).filter(function (entry) {
