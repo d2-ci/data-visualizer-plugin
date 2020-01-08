@@ -170,235 +170,6 @@ function _nonIterableRest() {
   throw new TypeError("Invalid attempt to destructure non-iterable instance");
 }
 
-var BASE_FIELD_NAME = 'name';
-var BASE_FIELD_TYPE = 'type';
-var BASE_FIELD_YEARLY_SERIES = 'yearlySeries';
-
-var getFieldObject = function getFieldObject(name) {
-  var props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  return _objectSpread2(_defineProperty({}, BASE_FIELD_NAME, name), props);
-}; // fields by type
-
-
-var fieldsByType = {
-  reportTable: [getFieldObject('cumulative', {
-    option: true
-  }), getFieldObject('hideEmptyColumns', {
-    option: true
-  }), getFieldObject('legendDisplayStyle', {
-    option: true
-  }), getFieldObject('measureCriteria', {
-    option: true
-  }), getFieldObject('numberType', {
-    option: true
-  }), getFieldObject('regression', {
-    option: true
-  }), getFieldObject('reportParams', {
-    option: true
-  }), getFieldObject('skipRounding', {
-    option: true
-  })],
-  chart: [getFieldObject('category', {
-    excluded: true
-  }), getFieldObject('series', {
-    excluded: true
-  }), getFieldObject(BASE_FIELD_YEARLY_SERIES)],
-  eventReport: [getFieldObject('dataType')],
-  reportTable_eventReport: [getFieldObject('colSubTotals', {
-    option: true
-  }), getFieldObject('colTotals', {
-    option: true
-  }), getFieldObject('displayDensity', {
-    option: true
-  }), getFieldObject('fontSize', {
-    option: true
-  }), getFieldObject('hideEmptyRows', {
-    option: true
-  }), getFieldObject('rowSubTotals', {
-    option: true
-  }), getFieldObject('rowTotals', {
-    option: true
-  }), getFieldObject('showDimensionLabels', {
-    option: true
-  }), getFieldObject('showHierarchy', {
-    option: true
-  })],
-  chart_eventChart: [getFieldObject('baseLineLabel', {
-    option: true
-  }), getFieldObject('baseLineValue', {
-    option: true
-  }), getFieldObject('colorSet', {
-    option: true
-  }), getFieldObject('cumulativeValues', {
-    option: true
-  }), getFieldObject('domainAxisLabel', {
-    option: true
-  }), getFieldObject('hideEmptyRowItems', {
-    option: true
-  }), getFieldObject('hideLegend', {
-    option: true
-  }), getFieldObject('noSpaceBetweenColumns', {
-    option: true
-  }), getFieldObject('percentStackedValues', {
-    option: true
-  }), getFieldObject('rangeAxisDecimals', {
-    option: true
-  }), getFieldObject('rangeAxisLabel', {
-    option: true
-  }), getFieldObject('rangeAxisMaxValue', {
-    option: true
-  }), getFieldObject('rangeAxisMinValue', {
-    option: true
-  }), getFieldObject('rangeAxisSteps', {
-    option: true
-  }), getFieldObject('regressionType', {
-    option: true
-  }), getFieldObject('showData', {
-    option: true
-  }), getFieldObject('targetLineLabel', {
-    option: true
-  }), getFieldObject('targetLineValue', {
-    option: true
-  }), getFieldObject(BASE_FIELD_TYPE, {
-    option: true
-  })],
-  eventReport_eventChart: [getFieldObject('attributeValueDimension'), getFieldObject('collapseDataDimensions'), getFieldObject('dataElementValueDimension'), getFieldObject('endDate'), getFieldObject('eventStatus', {
-    option: true
-  }), getFieldObject('hideNaData', {
-    option: true
-  }), getFieldObject('outputType', {
-    option: true
-  }), getFieldObject('program'), getFieldObject('programStage'), getFieldObject('programStatus', {
-    option: true
-  }), getFieldObject('startDate'), getFieldObject('value')],
-  reportTable_chart_eventReport: [getFieldObject('legendDisplayStrategy', {
-    option: true
-  }), getFieldObject('legendSet', {
-    option: true
-  })],
-  reportTable_eventReport_eventChart: [getFieldObject('columnDimensions', {
-    excluded: true
-  }), getFieldObject('rowDimensions', {
-    excluded: true
-  })],
-  reportTable_chart_eventReport_eventChart: [getFieldObject('access'), getFieldObject('aggregationType', {
-    option: true
-  }), getFieldObject('attributeDimensions', {
-    excluded: true
-  }), getFieldObject('attributeValues', {
-    excluded: true
-  }), getFieldObject('categoryDimensions', {
-    excluded: true
-  }), getFieldObject('categoryOptionGroupSetDimensions', {
-    excluded: true
-  }), getFieldObject('code', {
-    excluded: true
-  }), getFieldObject('columns'), getFieldObject('completedOnly', {
-    option: true
-  }), getFieldObject('created'), getFieldObject('dataDimensionItems', {
-    excluded: true
-  }), getFieldObject('dataElementDimensions', {
-    excluded: true
-  }), getFieldObject('dataElementGroupSetDimensions', {
-    excluded: true
-  }), getFieldObject('description'), getFieldObject('digitGroupSeparator'), getFieldObject('displayDescription'), getFieldObject('displayName'), getFieldObject('displayShortName'), getFieldObject('externalAccess', {
-    excluded: true
-  }), getFieldObject('favorite'), getFieldObject('favorites'), getFieldObject('filterDimensions', {
-    excluded: true
-  }), getFieldObject('filters'), getFieldObject('hideSubtitle', {
-    option: true
-  }), getFieldObject('hideTitle', {
-    option: true
-  }), getFieldObject('href', {
-    excluded: true
-  }), getFieldObject('id'), getFieldObject('interpretations'), getFieldObject('itemOrganisationUnitGroups', {
-    excluded: true
-  }), getFieldObject('lastUpdated'), getFieldObject('lastUpdatedBy'), getFieldObject('name'), getFieldObject('organisationUnitGroupSetDimensions', {
-    excluded: true
-  }), getFieldObject('organisationUnitLevels', {
-    excluded: true
-  }), getFieldObject('organisationUnits', {
-    excluded: true
-  }), getFieldObject('parentGraphMap'), getFieldObject('periods', {
-    excluded: true
-  }), getFieldObject('programIndicatorDimensions', {
-    excluded: true
-  }), getFieldObject('publicAccess'), getFieldObject('relativePeriods', {
-    excluded: true
-  }), getFieldObject('rows'), getFieldObject('shortName'), getFieldObject('sortOrder', {
-    option: true
-  }), getFieldObject('subscribed'), getFieldObject('subscribers'), getFieldObject('subtitle', {
-    option: true
-  }), getFieldObject('timeField'), getFieldObject('title', {
-    option: true
-  }), getFieldObject('topLimit', {
-    option: true
-  }), getFieldObject('translations'), getFieldObject('user'), getFieldObject('userAccesses'), getFieldObject('userGroupAccesses'), getFieldObject('userOrganisationUnit', {
-    excluded: true
-  }), getFieldObject('userOrganisationUnitChildren', {
-    excluded: true
-  }), getFieldObject('userOrganisationUnitGrandChildren', {
-    excluded: true
-  })]
-}; // actions
-
-var extractName = function extractName(propObj) {
-  return propObj[BASE_FIELD_NAME];
-};
-var markExcluded = function markExcluded(fieldObj) {
-  return fieldObj.excluded === true ? _objectSpread2({}, fieldObj, _defineProperty({}, BASE_FIELD_NAME, "!".concat(fieldObj[BASE_FIELD_NAME]))) : fieldObj;
-};
-/* eslint-disable-next-line max-params */
-
-var moveExcludedToEnd = function moveExcludedToEnd(acc, current, curIndex, array) {
-  !acc && (acc = array.slice());
-  current.charAt(0) === '!' && acc.push(acc.shift());
-  return acc;
-}; // getters
-
-var getAllFieldObjectsByType = function getAllFieldObjectsByType(type) {
-  return Object.entries(fieldsByType).reduce(function (fields, _ref) {
-    var _ref2 = _slicedToArray(_ref, 2),
-        key = _ref2[0],
-        value = _ref2[1];
-
-    return key.includes(type) ? fields.concat(value) : fields;
-  }, []);
-};
-
-// constants
-var ID = 'id';
-var NAME = 'name,displayName,displayShortName';
-var DIMENSION_ITEM = "dimensionItem~rename(".concat(ID, ")");
-var LEGEND_SET = "legendSet[".concat(ID, ",").concat(NAME, "]");
-var USER = "user[".concat(NAME, ",userCredentials[username]]");
-var ITEMS = "items[".concat(DIMENSION_ITEM, ",").concat(NAME, ",dimensionItemType]");
-var COMMENTS = "comments[".concat(ID, ",").concat(USER, ",lastUpdated,text");
-var AXIS = "dimension,filter,".concat(LEGEND_SET, ",").concat(ITEMS);
-var INTERPRETATIONS = 'id,created'; // nested fields map
-
-var nestedFields = {
-  columns: AXIS,
-  rows: AXIS,
-  filters: AXIS,
-  user: USER,
-  comments: COMMENTS,
-  interpretations: INTERPRETATIONS
-};
-var extendFields = function extendFields(field) {
-  return "".concat(field).concat(nestedFields[field] ? "[".concat(nestedFields[field], "]") : '');
-};
-
-var getFieldsStringByType = function getFieldsStringByType(type) {
-  return getAllFieldObjectsByType(type).map(markExcluded).map(extractName).sort().reduce(moveExcludedToEnd, null).map(extendFields).join(',');
-};
-
-var apiFetchVisualization = function apiFetchVisualization(d2, type, id) {
-  return d2.models[type].get(id, {
-    fields: getFieldsStringByType(type)
-  });
-};
-
 var peId = 'pe';
 var apiFetchAnalytics = function apiFetchAnalytics(d2, current, options) {
   var req, rawResponse;
@@ -765,38 +536,15 @@ function (_Component) {
       return options;
     });
 
-    _defineProperty(_assertThisInitialized(_this), "getConfigById", function (id) {
-      return apiFetchVisualization(_this.props.d2, 'chart', id);
-    });
-
     _defineProperty(_assertThisInitialized(_this), "renderChart", function _callee() {
-      var _this$props, config, filters, forDashboard, onResponsesReceived, onChartGenerated, onError, visualization, options, extraOptions, responses, yearlySeriesLabels, _ref3;
+      var _this$props, visualization, filters, forDashboard, onResponsesReceived, onChartGenerated, onError, options, extraOptions, responses, yearlySeriesLabels, _ref3;
 
       return regeneratorRuntime.async(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              _this$props = _this.props, config = _this$props.config, filters = _this$props.filters, forDashboard = _this$props.forDashboard, onResponsesReceived = _this$props.onResponsesReceived, onChartGenerated = _this$props.onChartGenerated, onError = _this$props.onError;
+              _this$props = _this.props, visualization = _this$props.config, filters = _this$props.filters, forDashboard = _this$props.forDashboard, onResponsesReceived = _this$props.onResponsesReceived, onChartGenerated = _this$props.onChartGenerated, onError = _this$props.onError;
               _context.prev = 1;
-
-              if (!(Object.keys(config).length === 1 && config.id)) {
-                _context.next = 8;
-                break;
-              }
-
-              _context.next = 5;
-              return regeneratorRuntime.awrap(_this.getConfigById(config.id));
-
-            case 5:
-              _context.t0 = _context.sent;
-              _context.next = 9;
-              break;
-
-            case 8:
-              _context.t0 = config;
-
-            case 9:
-              visualization = _context.t0;
               options = _this.getRequestOptions(visualization, filters);
               extraOptions = {
                 dashboard: forDashboard,
@@ -807,31 +555,31 @@ function (_Component) {
               responses = [];
 
               if (!isYearOverYear(visualization.type)) {
-                _context.next = 24;
+                _context.next = 16;
                 break;
               }
 
               yearlySeriesLabels = [];
-              _context.next = 17;
+              _context.next = 9;
               return regeneratorRuntime.awrap(apiFetchAnalyticsForYearOverYear(_this.props.d2, visualization, options));
 
-            case 17:
+            case 9:
               _ref3 = _context.sent;
               responses = _ref3.responses;
               yearlySeriesLabels = _ref3.yearlySeriesLabels;
-              extraOptions[BASE_FIELD_YEARLY_SERIES] = yearlySeriesLabels;
+              extraOptions.yearlySeries = yearlySeriesLabels;
               extraOptions.xAxisLabels = computeGenericPeriodNames(responses);
-              _context.next = 27;
+              _context.next = 19;
               break;
 
-            case 24:
-              _context.next = 26;
+            case 16:
+              _context.next = 18;
               return regeneratorRuntime.awrap(apiFetchAnalytics(_this.props.d2, visualization, options));
 
-            case 26:
+            case 18:
               responses = _context.sent;
 
-            case 27:
+            case 19:
               if (responses.length) {
                 onResponsesReceived(responses);
               }
@@ -859,20 +607,20 @@ function (_Component) {
                 isLoading: false
               });
 
-              _context.next = 36;
+              _context.next = 28;
               break;
 
-            case 33:
-              _context.prev = 33;
-              _context.t1 = _context["catch"](1);
-              onError(_context.t1);
+            case 25:
+              _context.prev = 25;
+              _context.t0 = _context["catch"](1);
+              onError(_context.t0);
 
-            case 36:
+            case 28:
             case "end":
               return _context.stop();
           }
         }
-      }, null, null, [[1, 33]]);
+      }, null, null, [[1, 25]]);
     });
 
     _this.canvasRef = React.createRef();
@@ -989,18 +737,14 @@ function (_Component) {
       return options;
     });
 
-    _defineProperty(_assertThisInitialized(_this), "getConfigById", function (id) {
-      return apiFetchVisualization(_this.props.d2, 'reportTable', id);
-    });
-
     _defineProperty(_assertThisInitialized(_this), "renderTable", function _callee() {
-      var _this$props, config$1, filters, onResponsesReceived, onError, i18nManager, appManager, uiManager, d2aOptionConfig, refs, visualization, options, responses;
+      var _this$props, visualization, filters, onResponsesReceived, onError, i18nManager, appManager, uiManager, d2aOptionConfig, refs, options, responses;
 
       return regeneratorRuntime.async(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              _this$props = _this.props, config$1 = _this$props.config, filters = _this$props.filters, onResponsesReceived = _this$props.onResponsesReceived, onError = _this$props.onError;
+              _this$props = _this.props, visualization = _this$props.config, filters = _this$props.filters, onResponsesReceived = _this$props.onResponsesReceived, onError = _this$props.onError;
               i18nManager = {
                 get: function get(string) {
                   return i18n.t(string);
@@ -1026,30 +770,11 @@ function (_Component) {
                 optionConfig: d2aOptionConfig
               };
               _context.prev = 8;
-
-              if (!(Object.keys(config$1).length === 1 && config$1.id)) {
-                _context.next = 15;
-                break;
-              }
-
-              _context.next = 12;
-              return regeneratorRuntime.awrap(_this.getConfigById(config$1.id));
-
-            case 12:
-              _context.t0 = _context.sent;
-              _context.next = 16;
-              break;
-
-            case 15:
-              _context.t0 = config$1;
-
-            case 16:
-              visualization = _context.t0;
               options = _this.getRequestOptions(visualization, filters);
-              _context.next = 20;
+              _context.next = 12;
               return regeneratorRuntime.awrap(apiFetchAnalytics(_this.props.d2, visualization, options));
 
-            case 20:
+            case 12:
               responses = _context.sent;
 
               if (responses.length) {
@@ -1082,20 +807,20 @@ function (_Component) {
                 isLoading: false
               });
 
-              _context.next = 30;
+              _context.next = 22;
               break;
 
-            case 27:
-              _context.prev = 27;
-              _context.t1 = _context["catch"](8);
-              onError(_context.t1);
+            case 19:
+              _context.prev = 19;
+              _context.t0 = _context["catch"](8);
+              onError(_context.t0);
 
-            case 30:
+            case 22:
             case "end":
               return _context.stop();
           }
         }
-      }, null, null, [[8, 27]]);
+      }, null, null, [[8, 19]]);
     });
 
     _this.canvasRef = React.createRef();
