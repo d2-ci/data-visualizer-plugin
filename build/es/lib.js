@@ -721,7 +721,7 @@ var getRequestOptions = function getRequestOptions(visualization, filters) {
 };
 
 var PivotPlugin = function PivotPlugin(_ref3) {
-  var visualization = _ref3.config,
+  var config = _ref3.config,
       filters = _ref3.filters,
       style = _ref3.style,
       onError = _ref3.onError,
@@ -736,18 +736,24 @@ var PivotPlugin = function PivotPlugin(_ref3) {
 
   var _useState3 = useState(null),
       _useState4 = _slicedToArray(_useState3, 2),
-      data = _useState4[0],
-      setData = _useState4[1];
+      visualization = _useState4[0],
+      setVisualization = _useState4[1];
+
+  var _useState5 = useState(null),
+      _useState6 = _slicedToArray(_useState5, 2),
+      data = _useState6[0],
+      setData = _useState6[1];
 
   var remappedOptions = {
-    showColTotals: visualization.colTotals,
-    showRowTotals: visualization.rowTotals,
-    showColSubTotals: visualization.colSubTotals,
-    showRowSubTotals: visualization.rowSubTotals
+    showColumnTotals: config.colTotals,
+    showRowTotals: config.rowTotals,
+    showColSubtotals: config.colSubTotals,
+    showRowSubtotals: config.rowSubTotals
   };
   useEffect(function () {
-    var options = getRequestOptions(visualization, filters);
-    apiFetchAnalytics(d2, visualization, options).then(function (responses) {
+    setIsLoading(true);
+    var options = getRequestOptions(config, filters);
+    apiFetchAnalytics(d2, config, options).then(function (responses) {
       if (!responses.length) {
         return;
       }
@@ -756,12 +762,13 @@ var PivotPlugin = function PivotPlugin(_ref3) {
         onResponsesReceived(responses);
       }
 
+      setVisualization(config);
       setData(responses[0].response);
       setIsLoading(false);
     }).catch(function (error) {
       onError(error);
     }); // TODO: cancellation
-  }, [visualization, filters, id
+  }, [config, filters, id
   /* TODO: short-circuit when id changes? */
   , onResponsesReceived, onError, d2]);
   return React.createElement("div", {
