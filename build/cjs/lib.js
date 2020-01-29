@@ -752,7 +752,7 @@ var PivotPlugin = function PivotPlugin(_ref3) {
   var remappedOptions = {
     showColumnTotals: config.colTotals,
     showRowTotals: config.rowTotals,
-    showColSubtotals: config.colSubTotals,
+    showColumnSubtotals: config.colSubTotals,
     showRowSubtotals: config.rowSubTotals
   };
   React.useEffect(function () {
