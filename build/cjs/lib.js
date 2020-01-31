@@ -731,7 +731,6 @@ var PivotPlugin = function PivotPlugin(_ref3) {
       style = _ref3.style,
       onError = _ref3.onError,
       onResponsesReceived = _ref3.onResponsesReceived,
-      id = _ref3.id,
       d2 = _ref3.d2;
 
   var _useState = React.useState(true),
@@ -749,12 +748,6 @@ var PivotPlugin = function PivotPlugin(_ref3) {
       data = _useState6[0],
       setData = _useState6[1];
 
-  var remappedOptions = {
-    showColumnTotals: config.colTotals,
-    showRowTotals: config.rowTotals,
-    showColumnSubtotals: config.colSubTotals,
-    showRowSubtotals: config.rowSubTotals
-  };
   React.useEffect(function () {
     setIsLoading(true);
     var options = getRequestOptions(config, filters);
@@ -773,18 +766,20 @@ var PivotPlugin = function PivotPlugin(_ref3) {
     }).catch(function (error) {
       onError(error);
     }); // TODO: cancellation
-  }, [config, filters, id
-  /* TODO: short-circuit when id changes? */
-  , onResponsesReceived, onError, d2]);
+  }, [config, filters, onResponsesReceived, onError, d2]);
   return React__default.createElement("div", {
     style: _objectSpread2({
       width: '100%',
       height: '100%'
     }, style)
-  }, isLoading ? React__default.createElement(LoadingMask, null) : React__default.createElement(analytics.PivotTable, {
+  }, isLoading ? React__default.createElement("div", {
+    style: {
+      placeSelf: 'center',
+      flex: '1 0 0%'
+    }
+  }, React__default.createElement(LoadingMask, null)) : React__default.createElement(analytics.PivotTable, {
     visualization: visualization,
-    data: data,
-    options: remappedOptions
+    data: data
   }));
 };
 
@@ -800,7 +795,6 @@ PivotPlugin.propTypes = {
   d2: PropTypes.object.isRequired,
   onError: PropTypes.func.isRequired,
   filters: PropTypes.object,
-  id: PropTypes.number,
   style: PropTypes.object,
   onResponsesReceived: PropTypes.func
 };
