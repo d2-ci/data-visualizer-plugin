@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React, { Fragment, Component } from 'react';
+import React, { Component } from 'react';
 import { createVisualization, isSingleValue, isYearOverYear, VIS_TYPE_PIVOT_TABLE } from '@dhis2/analytics';
 import PropTypes from 'prop-types';
 import isEqual from 'lodash-es/isEqual';
@@ -7,8 +7,6 @@ import i18n from '@dhis2/d2-i18n';
 import 'lodash-es/pick';
 import _JSXStyle from 'styled-jsx/style';
 import { Layout, table, Response, config, api } from 'd2-analysis';
-import { withStyles } from '@material-ui/core/styles';
-import CircularProgress from '@material-ui/core/CircularProgress';
 
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -573,32 +571,25 @@ function (_Component) {
 
               _this.recreateVisualization();
 
-              _this.setState({
-                isLoading: false
-              });
-
               onLoadingComplete();
-              _context.next = 29;
+              _context.next = 28;
               break;
 
-            case 26:
-              _context.prev = 26;
+            case 25:
+              _context.prev = 25;
               _context.t0 = _context["catch"](1);
               onError(_context.t0);
 
-            case 29:
+            case 28:
             case "end":
               return _context.stop();
           }
         }
-      }, null, null, [[1, 26]]);
+      }, null, null, [[1, 25]]);
     });
 
     _this.canvasRef = React.createRef();
     _this.recreateVisualization = Function.prototype;
-    _this.state = {
-      isLoading: true
-    };
     return _this;
   }
 
@@ -630,10 +621,10 @@ function (_Component) {
   }, {
     key: "render",
     value: function render() {
-      return React.createElement(Fragment, null, React.createElement("div", {
+      return React.createElement("div", {
         ref: this.canvasRef,
         style: this.props.style
-      }));
+      });
     }
   }]);
 
@@ -664,36 +655,6 @@ ChartPlugin.propTypes = {
   onLoadingComplete: PropTypes.func,
   onResponsesReceived: PropTypes.func
 };
-
-var styles = function styles(theme) {
-  return {
-    progress: {
-      margin: theme.spacing.unit * 2,
-      maxWidth: 200,
-      textAlign: 'center',
-      alignSelf: 'center'
-    },
-    outer: {
-      display: 'flex',
-      justifyContent: 'center',
-      height: '100%'
-    }
-  };
-};
-
-function CircularIndeterminate(props) {
-  var classes = props.classes;
-  return React.createElement("div", {
-    className: classes.outer
-  }, React.createElement(CircularProgress, {
-    className: classes.progress
-  }));
-}
-
-CircularIndeterminate.propTypes = {
-  classes: PropTypes.object.isRequired
-};
-var LoadingMask = withStyles(styles)(CircularIndeterminate);
 
 var pivotTableStyles = [".pivot td{border:1px solid #b2b2b2;padding:5px;}", ".pivot-empty{background-color:#cddaed;}", ".pivot-dim{background-color:#dae6f8;text-align:center;}", ".pivot-dim-total{background-color:#bac6d8;text-align:center;}", ".pivot-value{background-color:#fff;text-align:right;}", ".pivot-value-total-subgrandtotal{background-color:#d8d8d8;white-space:nowrap;text-align:right;}", ".pointer{cursor:pointer;}"];
 pivotTableStyles.__hash = "3856634977";
@@ -741,13 +702,13 @@ function (_Component) {
     });
 
     _defineProperty(_assertThisInitialized(_this), "renderTable", function _callee() {
-      var _this$props, visualization, filters, onResponsesReceived, onError, i18nManager, appManager, uiManager, d2aOptionConfig, refs, options, responses;
+      var _this$props, visualization, filters, onResponsesReceived, onError, onLoadingComplete, i18nManager, appManager, uiManager, d2aOptionConfig, refs, options, responses;
 
       return regeneratorRuntime.async(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              _this$props = _this.props, visualization = _this$props.config, filters = _this$props.filters, onResponsesReceived = _this$props.onResponsesReceived, onError = _this$props.onError;
+              _this$props = _this.props, visualization = _this$props.config, filters = _this$props.filters, onResponsesReceived = _this$props.onResponsesReceived, onError = _this$props.onError, onLoadingComplete = _this$props.onLoadingComplete;
               i18nManager = {
                 get: function get(string) {
                   return i18n.t(string);
@@ -806,10 +767,7 @@ function (_Component) {
 
               _this.recreateVisualization();
 
-              _this.setState({
-                isLoading: false
-              });
-
+              onLoadingComplete();
               _context.next = 22;
               break;
 
@@ -828,9 +786,6 @@ function (_Component) {
 
     _this.canvasRef = React.createRef();
     _this.recreateVisualization = Function.prototype;
-    _this.state = {
-      isLoading: true
-    };
     return _this;
   }
 
@@ -862,13 +817,13 @@ function (_Component) {
   }, {
     key: "render",
     value: function render() {
-      return React.createElement(Fragment, null, this.state.isLoading ? React.createElement(LoadingMask, null) : null, React.createElement("div", {
+      return React.createElement("div", {
         ref: this.canvasRef,
         style: this.props.style,
         className: "jsx-".concat(pivotTableStyles.__hash)
       }, React.createElement(_JSXStyle, {
         id: pivotTableStyles.__hash
-      }, pivotTableStyles)));
+      }, pivotTableStyles));
     }
   }]);
 
@@ -881,6 +836,7 @@ PivotPlugin.defaultProps = {
   style: {},
   animation: 200,
   onError: Function.prototype,
+  onLoadingComplete: Function.prototype,
   onResponsesReceived: Function.prototype
 };
 PivotPlugin.propTypes = {
@@ -890,6 +846,7 @@ PivotPlugin.propTypes = {
   filters: PropTypes.object,
   id: PropTypes.number,
   style: PropTypes.object,
+  onLoadingComplete: PropTypes.func,
   onResponsesReceived: PropTypes.func
 };
 
