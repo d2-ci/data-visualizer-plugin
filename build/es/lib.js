@@ -1,12 +1,10 @@
 /* eslint-disable */
-import React, { Component } from 'react';
-import { createVisualization, isSingleValue, isYearOverYear, VIS_TYPE_PIVOT_TABLE } from '@dhis2/analytics';
+import React, { Component, useState, useEffect } from 'react';
+import { createVisualization, isSingleValue, isYearOverYear, PivotTable, VIS_TYPE_PIVOT_TABLE } from '@dhis2/analytics';
 import PropTypes from 'prop-types';
 import isEqual from 'lodash-es/isEqual';
 import i18n from '@dhis2/d2-i18n';
 import 'lodash-es/pick';
-import _JSXStyle from 'styled-jsx/style';
-import { Layout, table, Response, config, api } from 'd2-analysis';
 
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -656,185 +654,93 @@ ChartPlugin.propTypes = {
   onResponsesReceived: PropTypes.func
 };
 
-var pivotTableStyles = [".pivot td{border:1px solid #b2b2b2;padding:5px;}", ".pivot-empty{background-color:#cddaed;}", ".pivot-dim{background-color:#dae6f8;text-align:center;}", ".pivot-dim-total{background-color:#bac6d8;text-align:center;}", ".pivot-value{background-color:#fff;text-align:right;}", ".pivot-value-total-subgrandtotal{background-color:#d8d8d8;white-space:nowrap;text-align:right;}", ".pointer{cursor:pointer;}"];
-pivotTableStyles.__hash = "3856634977";
+var getRequestOptions = function getRequestOptions(visualization, filters) {
+  var options = getOptionsForRequest().reduce(function (map, _ref) {
+    var _ref2 = _slicedToArray(_ref, 2),
+        option = _ref2[0],
+        props = _ref2[1];
 
-var PivotPlugin =
-/*#__PURE__*/
-function (_Component) {
-  _inherits(PivotPlugin, _Component);
+    // only add parameter if value !== default
+    if (visualization[option] !== undefined && visualization[option] !== props.defaultValue) {
+      map[option] = visualization[option];
+    }
 
-  function PivotPlugin(_props) {
-    var _this;
+    return map;
+  }, {}); // interpretation filter
 
-    _classCallCheck(this, PivotPlugin);
-
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(PivotPlugin).call(this, _props));
-
-    _defineProperty(_assertThisInitialized(_this), "getRequestOptions", function (visualization, filters) {
-      var options = getOptionsForRequest().reduce(function (map, _ref) {
-        var _ref2 = _slicedToArray(_ref, 2),
-            option = _ref2[0],
-            props = _ref2[1];
-
-        // only add parameter if value !== default
-        if (visualization[option] !== undefined && visualization[option] !== props.defaultValue) {
-          map[option] = visualization[option];
-        }
-
-        return map;
-      }, {}); // interpretation filter
-
-      if (filters.relativePeriodDate) {
-        options.relativePeriodDate = filters.relativePeriodDate;
-      } // global filters
-      // userOrgUnit
+  if (filters.relativePeriodDate) {
+    options.relativePeriodDate = filters.relativePeriodDate;
+  } // global filters
+  // userOrgUnit
 
 
-      if (filters.userOrgUnit && filters.userOrgUnit.length) {
-        var ouIds = filters.userOrgUnit.map(function (ouPath) {
-          return ouPath.split('/').slice(-1)[0];
-        });
-        options.userOrgUnit = ouIds.join(';');
-      }
-
-      return options;
+  if (filters.userOrgUnit && filters.userOrgUnit.length) {
+    var ouIds = filters.userOrgUnit.map(function (ouPath) {
+      return ouPath.split('/').slice(-1)[0];
     });
-
-    _defineProperty(_assertThisInitialized(_this), "renderTable", function _callee() {
-      var _this$props, visualization, filters, onResponsesReceived, onError, onLoadingComplete, i18nManager, appManager, uiManager, d2aOptionConfig, refs, options, responses;
-
-      return regeneratorRuntime.async(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              _this$props = _this.props, visualization = _this$props.config, filters = _this$props.filters, onResponsesReceived = _this$props.onResponsesReceived, onError = _this$props.onError, onLoadingComplete = _this$props.onLoadingComplete;
-              i18nManager = {
-                get: function get(string) {
-                  return i18n.t(string);
-                }
-              };
-              appManager = {
-                getLegendSetById: function getLegendSetById() {
-                  return '';
-                },
-                getApiPath: function getApiPath() {
-                  return '';
-                }
-              };
-              uiManager = {};
-              d2aOptionConfig = new config.OptionConfig();
-              d2aOptionConfig.setI18nManager(i18nManager);
-              d2aOptionConfig.init();
-              refs = {
-                api: api,
-                appManager: appManager,
-                uiManager: uiManager,
-                i18nManager: i18nManager,
-                optionConfig: d2aOptionConfig
-              };
-              _context.prev = 8;
-              options = _this.getRequestOptions(visualization, filters);
-              _context.next = 12;
-              return regeneratorRuntime.awrap(apiFetchAnalytics(_this.props.d2, visualization, options));
-
-            case 12:
-              responses = _context.sent;
-
-              if (responses.length) {
-                onResponsesReceived(responses);
-              }
-
-              _this.recreateVisualization = function () {
-                var remappedOptions = {
-                  showColTotals: visualization.colTotals,
-                  showRowTotals: visualization.rowTotals,
-                  showColSubTotals: visualization.colSubTotals,
-                  showRowSubTotals: visualization.rowSubTotals,
-                  numberType: visualization.numberType || 'VALUE' // TODO read default from options, perhaps better idea is to compute layout content in app
-
-                };
-                var layout = new Layout(refs, visualization, remappedOptions);
-                var extraOptions = {
-                  renderLimit: 100000,
-                  trueTotals: true
-                };
-                var pivotTable = new table.PivotTable(refs, layout, new Response(refs, responses[0].response), extraOptions);
-                pivotTable.initialize();
-                pivotTable.build();
-                _this.canvasRef.current.innerHTML = pivotTable.render();
-              };
-
-              _this.recreateVisualization();
-
-              onLoadingComplete();
-              _context.next = 22;
-              break;
-
-            case 19:
-              _context.prev = 19;
-              _context.t0 = _context["catch"](8);
-              onError(_context.t0);
-
-            case 22:
-            case "end":
-              return _context.stop();
-          }
-        }
-      }, null, null, [[8, 19]]);
-    });
-
-    _this.canvasRef = React.createRef();
-    _this.recreateVisualization = Function.prototype;
-    return _this;
+    options.userOrgUnit = ouIds.join(';');
   }
 
-  _createClass(PivotPlugin, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      this.renderTable();
-    }
-  }, {
-    key: "componentDidUpdate",
-    value: function componentDidUpdate(prevProps) {
-      if (!isEqual(this.props.config, prevProps.config)) {
-        this.renderTable();
+  return options;
+};
+
+var PivotPlugin = function PivotPlugin(_ref3) {
+  var config = _ref3.config,
+      filters = _ref3.filters,
+      style = _ref3.style,
+      onError = _ref3.onError,
+      onResponsesReceived = _ref3.onResponsesReceived,
+      d2 = _ref3.d2;
+
+  var _useState = useState(true),
+      _useState2 = _slicedToArray(_useState, 2),
+      isLoading = _useState2[0],
+      setIsLoading = _useState2[1];
+
+  var _useState3 = useState(null),
+      _useState4 = _slicedToArray(_useState3, 2),
+      visualization = _useState4[0],
+      setVisualization = _useState4[1];
+
+  var _useState5 = useState(null),
+      _useState6 = _slicedToArray(_useState5, 2),
+      data = _useState6[0],
+      setData = _useState6[1];
+
+  useEffect(function () {
+    setIsLoading(true);
+    var options = getRequestOptions(config, filters);
+    apiFetchAnalytics(d2, config, options).then(function (responses) {
+      if (!responses.length) {
         return;
       }
 
-      if (!isEqual(this.props.filters, prevProps.filters)) {
-        this.renderTable();
-        return;
-      } // id set by DV app, style works in dashboards
-
-
-      if (this.props.id !== prevProps.id || !isEqual(this.props.style, prevProps.style)) {
-        this.recreateVisualization(0); // disable animation
-
-        return;
+      if (onResponsesReceived) {
+        onResponsesReceived(responses);
       }
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      return React.createElement("div", {
-        ref: this.canvasRef,
-        style: this.props.style,
-        className: "jsx-".concat(pivotTableStyles.__hash)
-      }, React.createElement(_JSXStyle, {
-        id: pivotTableStyles.__hash
-      }, pivotTableStyles));
-    }
-  }]);
 
-  return PivotPlugin;
-}(Component);
+      setVisualization(config);
+      setData(responses[0].response);
+      onLoadingComplete();
+    }).catch(function (error) {
+      onError(error);
+    }); // TODO: cancellation
+  }, [config, filters, onResponsesReceived, onError, d2]);
+  return React.createElement("div", {
+    style: _objectSpread2({
+      width: '100%',
+      height: '100%'
+    }, style)
+  }, React.createElement(PivotTable, {
+    visualization: visualization,
+    data: data
+  }));
+};
 
 PivotPlugin.defaultProps = {
   config: {},
   filters: {},
   style: {},
-  animation: 200,
   onError: Function.prototype,
   onLoadingComplete: Function.prototype,
   onResponsesReceived: Function.prototype
@@ -844,7 +750,6 @@ PivotPlugin.propTypes = {
   d2: PropTypes.object.isRequired,
   onError: PropTypes.func.isRequired,
   filters: PropTypes.object,
-  id: PropTypes.number,
   style: PropTypes.object,
   onLoadingComplete: PropTypes.func,
   onResponsesReceived: PropTypes.func
