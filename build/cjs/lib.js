@@ -695,25 +695,20 @@ var PivotPlugin = function PivotPlugin(_ref3) {
       style = _ref3.style,
       onError = _ref3.onError,
       onResponsesReceived = _ref3.onResponsesReceived,
-      d2 = _ref3.d2;
+      d2 = _ref3.d2,
+      onLoadingComplete = _ref3.onLoadingComplete;
 
-  var _useState = React.useState(true),
+  var _useState = React.useState(null),
       _useState2 = _slicedToArray(_useState, 2),
-      isLoading = _useState2[0],
-      setIsLoading = _useState2[1];
+      visualization = _useState2[0],
+      setVisualization = _useState2[1];
 
   var _useState3 = React.useState(null),
       _useState4 = _slicedToArray(_useState3, 2),
-      visualization = _useState4[0],
-      setVisualization = _useState4[1];
-
-  var _useState5 = React.useState(null),
-      _useState6 = _slicedToArray(_useState5, 2),
-      data = _useState6[0],
-      setData = _useState6[1];
+      data = _useState4[0],
+      setData = _useState4[1];
 
   React.useEffect(function () {
-    setIsLoading(true);
     var options = getRequestOptions(config, filters);
     apiFetchAnalytics(d2, config, options).then(function (responses) {
       if (!responses.length) {
@@ -730,7 +725,7 @@ var PivotPlugin = function PivotPlugin(_ref3) {
     }).catch(function (error) {
       onError(error);
     }); // TODO: cancellation
-  }, [config, filters, onResponsesReceived, onError, d2]);
+  }, [config, filters, onResponsesReceived, onError, d2, onLoadingComplete]);
   return React__default.createElement("div", {
     style: _objectSpread2({
       width: '100%',
