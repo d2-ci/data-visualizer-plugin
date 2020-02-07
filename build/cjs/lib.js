@@ -10,8 +10,6 @@ var PropTypes = _interopDefault(require('prop-types'));
 var isEqual = _interopDefault(require('lodash-es/isEqual'));
 var i18n = _interopDefault(require('@dhis2/d2-i18n'));
 require('lodash-es/pick');
-var styles$1 = require('@material-ui/core/styles');
-var CircularProgress = _interopDefault(require('@material-ui/core/CircularProgress'));
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
   try {
@@ -523,36 +521,6 @@ var computeGenericPeriodNames = function computeGenericPeriodNames(responses) {
   }, []);
 };
 
-var styles = function styles(theme) {
-  return {
-    progress: {
-      margin: theme.spacing.unit * 2,
-      maxWidth: 200,
-      textAlign: 'center',
-      alignSelf: 'center'
-    },
-    outer: {
-      display: 'flex',
-      justifyContent: 'center',
-      height: '100%'
-    }
-  };
-};
-
-function CircularIndeterminate(props) {
-  var classes = props.classes;
-  return React__default.createElement("div", {
-    className: classes.outer
-  }, React__default.createElement(CircularProgress, {
-    className: classes.progress
-  }));
-}
-
-CircularIndeterminate.propTypes = {
-  classes: PropTypes.object.isRequired
-};
-var LoadingMask = styles$1.withStyles(styles)(CircularIndeterminate);
-
 var ChartPlugin =
 /*#__PURE__*/
 function (_Component) {
@@ -600,13 +568,13 @@ function (_Component) {
     _asyncToGenerator(
     /*#__PURE__*/
     regeneratorRuntime.mark(function _callee() {
-      var _this$props, visualization, filters, forDashboard, onResponsesReceived, onChartGenerated, onError, options, extraOptions, responses, yearlySeriesLabels, _ref4;
+      var _this$props, visualization, filters, forDashboard, onResponsesReceived, onChartGenerated, onError, onLoadingComplete, options, extraOptions, responses, yearlySeriesLabels, _ref4;
 
       return regeneratorRuntime.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              _this$props = _this.props, visualization = _this$props.config, filters = _this$props.filters, forDashboard = _this$props.forDashboard, onResponsesReceived = _this$props.onResponsesReceived, onChartGenerated = _this$props.onChartGenerated, onError = _this$props.onError;
+              _this$props = _this.props, visualization = _this$props.config, filters = _this$props.filters, forDashboard = _this$props.forDashboard, onResponsesReceived = _this$props.onResponsesReceived, onChartGenerated = _this$props.onChartGenerated, onError = _this$props.onError, onLoadingComplete = _this$props.onLoadingComplete;
               _context.prev = 1;
               options = _this.getRequestOptions(visualization, filters);
               extraOptions = {
@@ -666,10 +634,7 @@ function (_Component) {
 
               _this.recreateVisualization();
 
-              _this.setState({
-                isLoading: false
-              });
-
+              onLoadingComplete();
               _context.next = 28;
               break;
 
@@ -688,9 +653,6 @@ function (_Component) {
 
     _this.canvasRef = React__default.createRef();
     _this.recreateVisualization = Function.prototype;
-    _this.state = {
-      isLoading: true
-    };
     return _this;
   }
 
@@ -722,10 +684,10 @@ function (_Component) {
   }, {
     key: "render",
     value: function render() {
-      return React__default.createElement(React.Fragment, null, this.state.isLoading ? React__default.createElement(LoadingMask, null) : null, React__default.createElement("div", {
+      return React__default.createElement("div", {
         ref: this.canvasRef,
         style: this.props.style
-      }));
+      });
     }
   }]);
 
@@ -740,6 +702,7 @@ ChartPlugin.defaultProps = {
   animation: 200,
   onError: Function.prototype,
   onChartGenerated: Function.prototype,
+  onLoadingComplete: Function.prototype,
   onResponsesReceived: Function.prototype
 };
 ChartPlugin.propTypes = {
@@ -752,6 +715,7 @@ ChartPlugin.propTypes = {
   id: PropTypes.number,
   style: PropTypes.object,
   onChartGenerated: PropTypes.func,
+  onLoadingComplete: PropTypes.func,
   onResponsesReceived: PropTypes.func
 };
 
@@ -791,25 +755,20 @@ var PivotPlugin = function PivotPlugin(_ref3) {
       style = _ref3.style,
       onError = _ref3.onError,
       onResponsesReceived = _ref3.onResponsesReceived,
-      d2 = _ref3.d2;
+      d2 = _ref3.d2,
+      onLoadingComplete = _ref3.onLoadingComplete;
 
-  var _useState = React.useState(true),
+  var _useState = React.useState(null),
       _useState2 = _slicedToArray(_useState, 2),
-      isLoading = _useState2[0],
-      setIsLoading = _useState2[1];
+      visualization = _useState2[0],
+      setVisualization = _useState2[1];
 
   var _useState3 = React.useState(null),
       _useState4 = _slicedToArray(_useState3, 2),
-      visualization = _useState4[0],
-      setVisualization = _useState4[1];
-
-  var _useState5 = React.useState(null),
-      _useState6 = _slicedToArray(_useState5, 2),
-      data = _useState6[0],
-      setData = _useState6[1];
+      data = _useState4[0],
+      setData = _useState4[1];
 
   React.useEffect(function () {
-    setIsLoading(true);
     var options = getRequestOptions(config, filters);
     apiFetchAnalytics(d2, config, options).then(function (responses) {
       if (!responses.length) {
@@ -822,22 +781,17 @@ var PivotPlugin = function PivotPlugin(_ref3) {
 
       setVisualization(config);
       setData(responses[0].response);
-      setIsLoading(false);
+      onLoadingComplete();
     }).catch(function (error) {
       onError(error);
     }); // TODO: cancellation
-  }, [config, filters, onResponsesReceived, onError, d2]);
+  }, [config, filters, onResponsesReceived, onError, d2, onLoadingComplete]);
   return React__default.createElement("div", {
     style: _objectSpread2({
       width: '100%',
       height: '100%'
     }, style)
-  }, isLoading ? React__default.createElement("div", {
-    style: {
-      placeSelf: 'center',
-      flex: '1 0 0%'
-    }
-  }, React__default.createElement(LoadingMask, null)) : React__default.createElement(analytics.PivotTable, {
+  }, React__default.createElement(analytics.PivotTable, {
     visualization: visualization,
     data: data
   }));
@@ -848,6 +802,7 @@ PivotPlugin.defaultProps = {
   filters: {},
   style: {},
   onError: Function.prototype,
+  onLoadingComplete: Function.prototype,
   onResponsesReceived: Function.prototype
 };
 PivotPlugin.propTypes = {
@@ -856,6 +811,7 @@ PivotPlugin.propTypes = {
   onError: PropTypes.func.isRequired,
   filters: PropTypes.object,
   style: PropTypes.object,
+  onLoadingComplete: PropTypes.func,
   onResponsesReceived: PropTypes.func
 };
 
