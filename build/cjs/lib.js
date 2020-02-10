@@ -700,13 +700,8 @@ var PivotPlugin = function PivotPlugin(_ref3) {
 
   var _useState = React.useState(null),
       _useState2 = _slicedToArray(_useState, 2),
-      visualization = _useState2[0],
-      setVisualization = _useState2[1];
-
-  var _useState3 = React.useState(null),
-      _useState4 = _slicedToArray(_useState3, 2),
-      data = _useState4[0],
-      setData = _useState4[1];
+      data = _useState2[0],
+      setData = _useState2[1];
 
   React.useEffect(function () {
     var options = getRequestOptions(config, filters);
@@ -719,7 +714,6 @@ var PivotPlugin = function PivotPlugin(_ref3) {
         onResponsesReceived(responses);
       }
 
-      setVisualization(config);
       setData(responses[0].response);
       onLoadingComplete();
     }).catch(function (error) {
@@ -731,8 +725,8 @@ var PivotPlugin = function PivotPlugin(_ref3) {
       width: '100%',
       height: '100%'
     }, style)
-  }, React__default.createElement(analytics.PivotTable, {
-    visualization: visualization,
+  }, !data ? null : React__default.createElement(analytics.PivotTable, {
+    visualization: config,
     data: data
   }));
 };
