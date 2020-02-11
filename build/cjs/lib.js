@@ -514,7 +514,7 @@ function (_Component) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              _this$props = _this.props, visualization = _this$props.config, filters = _this$props.filters, forDashboard = _this$props.forDashboard, onResponsesReceived = _this$props.onResponsesReceived, onChartGenerated = _this$props.onChartGenerated, onError = _this$props.onError, onLoadingComplete = _this$props.onLoadingComplete;
+              _this$props = _this.props, visualization = _this$props.visualization, filters = _this$props.filters, forDashboard = _this$props.forDashboard, onResponsesReceived = _this$props.onResponsesReceived, onChartGenerated = _this$props.onChartGenerated, onError = _this$props.onError, onLoadingComplete = _this$props.onLoadingComplete;
               _context.prev = 1;
               options = _this.getRequestOptions(visualization, filters);
               extraOptions = {
@@ -604,7 +604,7 @@ function (_Component) {
   }, {
     key: "componentDidUpdate",
     value: function componentDidUpdate(prevProps) {
-      if (!isEqual(this.props.config, prevProps.config)) {
+      if (!isEqual(this.props.visualization, prevProps.visualization)) {
         this.renderChart();
         return;
       }
@@ -635,7 +635,7 @@ function (_Component) {
 }(React.Component);
 
 ChartPlugin.defaultProps = {
-  config: {},
+  visualization: {},
   filters: {},
   forDashboard: false,
   style: {},
@@ -646,8 +646,8 @@ ChartPlugin.defaultProps = {
   onResponsesReceived: Function.prototype
 };
 ChartPlugin.propTypes = {
-  config: PropTypes.object.isRequired,
   d2: PropTypes.object.isRequired,
+  visualization: PropTypes.object.isRequired,
   onError: PropTypes.func.isRequired,
   animation: PropTypes.number,
   filters: PropTypes.object,
@@ -690,7 +690,7 @@ var getRequestOptions = function getRequestOptions(visualization, filters) {
 };
 
 var PivotPlugin = function PivotPlugin(_ref3) {
-  var config = _ref3.config,
+  var visualization = _ref3.visualization,
       filters = _ref3.filters,
       style = _ref3.style,
       onError = _ref3.onError,
@@ -704,8 +704,8 @@ var PivotPlugin = function PivotPlugin(_ref3) {
       setData = _useState2[1];
 
   React.useEffect(function () {
-    var options = getRequestOptions(config, filters);
-    apiFetchAnalytics(d2, config, options).then(function (responses) {
+    var options = getRequestOptions(visualization, filters);
+    apiFetchAnalytics(d2, visualization, options).then(function (responses) {
       if (!responses.length) {
         return;
       }
@@ -719,20 +719,20 @@ var PivotPlugin = function PivotPlugin(_ref3) {
     }).catch(function (error) {
       onError(error);
     }); // TODO: cancellation
-  }, [config, filters, onResponsesReceived, onError, d2, onLoadingComplete]);
+  }, [visualization, filters, onResponsesReceived, onError, d2, onLoadingComplete]);
   return React__default.createElement("div", {
     style: _objectSpread2({
       width: '100%',
       height: '100%'
     }, style)
   }, !data ? null : React__default.createElement(analytics.PivotTable, {
-    visualization: config,
+    visualization: visualization,
     data: data
   }));
 };
 
 PivotPlugin.defaultProps = {
-  config: {},
+  visualization: {},
   filters: {},
   style: {},
   onError: Function.prototype,
@@ -740,8 +740,8 @@ PivotPlugin.defaultProps = {
   onResponsesReceived: Function.prototype
 };
 PivotPlugin.propTypes = {
-  config: PropTypes.object.isRequired,
   d2: PropTypes.object.isRequired,
+  visualization: PropTypes.object.isRequired,
   onError: PropTypes.func.isRequired,
   filters: PropTypes.object,
   style: PropTypes.object,
@@ -750,7 +750,7 @@ PivotPlugin.propTypes = {
 };
 
 var VisualizationPlugin = function VisualizationPlugin(props) {
-  if (!props.config.type || props.config.type === analytics.VIS_TYPE_PIVOT_TABLE) {
+  if (!props.visualization.type || props.visualization.type === analytics.VIS_TYPE_PIVOT_TABLE) {
     return React__default.createElement(PivotPlugin, props);
   } else {
     return React__default.createElement(ChartPlugin, props);
