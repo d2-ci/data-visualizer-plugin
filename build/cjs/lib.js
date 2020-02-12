@@ -7,7 +7,6 @@ var React = require('react');
 var React__default = _interopDefault(React);
 var analytics = require('@dhis2/analytics');
 var PropTypes = _interopDefault(require('prop-types'));
-var isEqual = _interopDefault(require('lodash-es/isEqual'));
 var i18n = _interopDefault(require('@dhis2/d2-i18n'));
 require('lodash-es/pick');
 
@@ -45,28 +44,6 @@ function _asyncToGenerator(fn) {
       _next(undefined);
     });
   };
-}
-
-function _classCallCheck(instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-}
-
-function _defineProperties(target, props) {
-  for (var i = 0; i < props.length; i++) {
-    var descriptor = props[i];
-    descriptor.enumerable = descriptor.enumerable || false;
-    descriptor.configurable = true;
-    if ("value" in descriptor) descriptor.writable = true;
-    Object.defineProperty(target, descriptor.key, descriptor);
-  }
-}
-
-function _createClass(Constructor, protoProps, staticProps) {
-  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
-  if (staticProps) _defineProperties(Constructor, staticProps);
-  return Constructor;
 }
 
 function _defineProperty(obj, key, value) {
@@ -116,53 +93,6 @@ function _objectSpread2(target) {
   }
 
   return target;
-}
-
-function _inherits(subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function");
-  }
-
-  subClass.prototype = Object.create(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      writable: true,
-      configurable: true
-    }
-  });
-  if (superClass) _setPrototypeOf(subClass, superClass);
-}
-
-function _getPrototypeOf(o) {
-  _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
-    return o.__proto__ || Object.getPrototypeOf(o);
-  };
-  return _getPrototypeOf(o);
-}
-
-function _setPrototypeOf(o, p) {
-  _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
-    o.__proto__ = p;
-    return o;
-  };
-
-  return _setPrototypeOf(o, p);
-}
-
-function _assertThisInitialized(self) {
-  if (self === void 0) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
-
-  return self;
-}
-
-function _possibleConstructorReturn(self, call) {
-  if (call && (typeof call === "object" || typeof call === "function")) {
-    return call;
-  }
-
-  return _assertThisInitialized(self);
 }
 
 function _slicedToArray(arr, i) {
@@ -521,204 +451,6 @@ var computeGenericPeriodNames = function computeGenericPeriodNames(responses) {
   }, []);
 };
 
-var ChartPlugin =
-/*#__PURE__*/
-function (_Component) {
-  _inherits(ChartPlugin, _Component);
-
-  function ChartPlugin(_props) {
-    var _this;
-
-    _classCallCheck(this, ChartPlugin);
-
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(ChartPlugin).call(this, _props));
-
-    _defineProperty(_assertThisInitialized(_this), "getRequestOptions", function (visualization, filters) {
-      var options = getOptionsForRequest().reduce(function (map, _ref) {
-        var _ref2 = _slicedToArray(_ref, 2),
-            option = _ref2[0],
-            props = _ref2[1];
-
-        // only add parameter if value !== default
-        if (visualization[option] !== undefined && visualization[option] !== props.defaultValue) {
-          map[option] = visualization[option];
-        }
-
-        return map;
-      }, {}); // interpretation filter
-
-      if (filters.relativePeriodDate) {
-        options.relativePeriodDate = filters.relativePeriodDate;
-      } // global filters
-      // userOrgUnit
-
-
-      if (filters.userOrgUnit && filters.userOrgUnit.length) {
-        var ouIds = filters.userOrgUnit.map(function (ouPath) {
-          return ouPath.split('/').slice(-1)[0];
-        });
-        options.userOrgUnit = ouIds.join(';');
-      }
-
-      return options;
-    });
-
-    _defineProperty(_assertThisInitialized(_this), "renderChart",
-    /*#__PURE__*/
-    _asyncToGenerator(
-    /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee() {
-      var _this$props, visualization, filters, forDashboard, onResponsesReceived, onChartGenerated, onError, onLoadingComplete, options, extraOptions, responses, yearlySeriesLabels, _ref4;
-
-      return regeneratorRuntime.wrap(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              _this$props = _this.props, visualization = _this$props.config, filters = _this$props.filters, forDashboard = _this$props.forDashboard, onResponsesReceived = _this$props.onResponsesReceived, onChartGenerated = _this$props.onChartGenerated, onError = _this$props.onError, onLoadingComplete = _this$props.onLoadingComplete;
-              _context.prev = 1;
-              options = _this.getRequestOptions(visualization, filters);
-              extraOptions = {
-                dashboard: forDashboard,
-                noData: {
-                  text: i18n.t('No data')
-                }
-              };
-              responses = [];
-
-              if (!analytics.isYearOverYear(visualization.type)) {
-                _context.next = 16;
-                break;
-              }
-
-              yearlySeriesLabels = [];
-              _context.next = 9;
-              return apiFetchAnalyticsForYearOverYear(_this.props.d2, visualization, options);
-
-            case 9:
-              _ref4 = _context.sent;
-              responses = _ref4.responses;
-              yearlySeriesLabels = _ref4.yearlySeriesLabels;
-              extraOptions.yearlySeries = yearlySeriesLabels;
-              extraOptions.xAxisLabels = computeGenericPeriodNames(responses);
-              _context.next = 19;
-              break;
-
-            case 16:
-              _context.next = 18;
-              return apiFetchAnalytics(_this.props.d2, visualization, options);
-
-            case 18:
-              responses = _context.sent;
-
-            case 19:
-              if (responses.length) {
-                onResponsesReceived(responses);
-              }
-
-              _this.recreateVisualization = function () {
-                var animation = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _this.props.animation;
-                var visualizationConfig = analytics.createVisualization(responses, visualization, _this.canvasRef.current, _objectSpread2({}, extraOptions, {
-                  animation: animation
-                }), undefined, undefined, analytics.isSingleValue(visualization.type) ? 'dhis' : 'highcharts' // output format
-                );
-
-                if (analytics.isSingleValue(visualization.type)) {
-                  onChartGenerated(visualizationConfig.visualization);
-                } else {
-                  onChartGenerated(visualizationConfig.visualization.getSVGForExport({
-                    sourceHeight: 768,
-                    sourceWidth: 1024
-                  }));
-                }
-              };
-
-              _this.recreateVisualization();
-
-              onLoadingComplete();
-              _context.next = 28;
-              break;
-
-            case 25:
-              _context.prev = 25;
-              _context.t0 = _context["catch"](1);
-              onError(_context.t0);
-
-            case 28:
-            case "end":
-              return _context.stop();
-          }
-        }
-      }, _callee, null, [[1, 25]]);
-    })));
-
-    _this.canvasRef = React__default.createRef();
-    _this.recreateVisualization = Function.prototype;
-    return _this;
-  }
-
-  _createClass(ChartPlugin, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      this.renderChart();
-    }
-  }, {
-    key: "componentDidUpdate",
-    value: function componentDidUpdate(prevProps) {
-      if (!isEqual(this.props.config, prevProps.config)) {
-        this.renderChart();
-        return;
-      }
-
-      if (!isEqual(this.props.filters, prevProps.filters)) {
-        this.renderChart();
-        return;
-      } // id set by DV app, style works in dashboards
-
-
-      if (this.props.id !== prevProps.id || !isEqual(this.props.style, prevProps.style)) {
-        this.recreateVisualization(0); // disable animation
-
-        return;
-      }
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      return React__default.createElement("div", {
-        ref: this.canvasRef,
-        style: this.props.style
-      });
-    }
-  }]);
-
-  return ChartPlugin;
-}(React.Component);
-
-ChartPlugin.defaultProps = {
-  config: {},
-  filters: {},
-  forDashboard: false,
-  style: {},
-  animation: 200,
-  onError: Function.prototype,
-  onChartGenerated: Function.prototype,
-  onLoadingComplete: Function.prototype,
-  onResponsesReceived: Function.prototype
-};
-ChartPlugin.propTypes = {
-  config: PropTypes.object.isRequired,
-  d2: PropTypes.object.isRequired,
-  onError: PropTypes.func.isRequired,
-  animation: PropTypes.number,
-  filters: PropTypes.object,
-  forDashboard: PropTypes.bool,
-  id: PropTypes.number,
-  style: PropTypes.object,
-  onChartGenerated: PropTypes.func,
-  onLoadingComplete: PropTypes.func,
-  onResponsesReceived: PropTypes.func
-};
-
 var getRequestOptions = function getRequestOptions(visualization, filters) {
   var options = getOptionsForRequest().reduce(function (map, _ref) {
     var _ref2 = _slicedToArray(_ref, 2),
@@ -749,8 +481,194 @@ var getRequestOptions = function getRequestOptions(visualization, filters) {
   return options;
 };
 
+var fetchData =
+/*#__PURE__*/
+function () {
+  var _ref4 = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee(_ref3) {
+    var visualization, filters, d2, forDashboard, options, extraOptions, _ref5, _responses, yearlySeriesLabels, responses;
+
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            visualization = _ref3.visualization, filters = _ref3.filters, d2 = _ref3.d2, forDashboard = _ref3.forDashboard;
+            options = getRequestOptions(visualization, filters);
+            extraOptions = {
+              dashboard: forDashboard,
+              noData: {
+                text: i18n.t('No data')
+              }
+            };
+
+            if (!analytics.isYearOverYear(visualization.type)) {
+              _context.next = 10;
+              break;
+            }
+
+            _context.next = 6;
+            return apiFetchAnalyticsForYearOverYear(d2, visualization, options);
+
+          case 6:
+            _ref5 = _context.sent;
+            _responses = _ref5.responses;
+            yearlySeriesLabels = _ref5.yearlySeriesLabels;
+            return _context.abrupt("return", {
+              responses: _responses,
+              extraOptions: _objectSpread2({}, extraOptions, {
+                yearlySeries: yearlySeriesLabels,
+                xAxisLabels: computeGenericPeriodNames(_responses)
+              })
+            });
+
+          case 10:
+            _context.next = 12;
+            return apiFetchAnalytics(d2, visualization, options);
+
+          case 12:
+            responses = _context.sent;
+            return _context.abrupt("return", {
+              responses: responses,
+              extraOptions: extraOptions
+            });
+
+          case 14:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  }));
+
+  return function fetchData(_x) {
+    return _ref4.apply(this, arguments);
+  };
+}();
+
+var ChartPlugin = function ChartPlugin(_ref6) {
+  var visualization = _ref6.visualization,
+      filters = _ref6.filters,
+      id = _ref6.id,
+      style = _ref6.style,
+      d2 = _ref6.d2,
+      forDashboard = _ref6.forDashboard,
+      onResponsesReceived = _ref6.onResponsesReceived,
+      onChartGenerated = _ref6.onChartGenerated,
+      onError = _ref6.onError,
+      onLoadingComplete = _ref6.onLoadingComplete,
+      defaultAnimation = _ref6.animation;
+  var canvasRef = React.useRef(undefined);
+  var fetchResult = React.useRef(undefined);
+  var renderVisualization = React.useCallback(function (animation) {
+    if (!fetchResult.current) return;
+    var _fetchResult$current = fetchResult.current,
+        responses = _fetchResult$current.responses,
+        extraOptions = _fetchResult$current.extraOptions;
+    var visualizationConfig = analytics.createVisualization(responses, visualization, canvasRef.current, _objectSpread2({}, extraOptions, {
+      animation: animation
+    }), undefined, undefined, analytics.isSingleValue(visualization.type) ? 'dhis' : 'highcharts' // output format
+    );
+
+    if (analytics.isSingleValue(visualization.type)) {
+      onChartGenerated(visualizationConfig.visualization);
+    } else {
+      onChartGenerated(visualizationConfig.visualization.getSVGForExport({
+        sourceHeight: 768,
+        sourceWidth: 1024
+      }));
+    }
+  }, [canvasRef, visualization, onChartGenerated]);
+  var doFetch = React.useCallback(function (visualization, filters, forDashboard) {
+    fetchData({
+      visualization: visualization,
+      filters: filters,
+      d2: d2,
+      forDashboard: forDashboard
+    }).then(function (result) {
+      if (result.responses.length) {
+        onResponsesReceived(result.responses);
+      }
+
+      fetchResult.current = result;
+      renderVisualization(defaultAnimation);
+      onLoadingComplete();
+    }).catch(function (error) {
+      onError(error);
+    });
+  }, [d2, onResponsesReceived, onLoadingComplete, onError, renderVisualization, defaultAnimation]);
+  React.useEffect(function () {
+    doFetch(visualization, filters, forDashboard);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [visualization, filters, forDashboard]);
+  React.useEffect(function () {
+    renderVisualization(0);
+  }, [id, style]);
+  /* eslint-disable-line react-hooks/exhaustive-deps */
+
+  return React__default.createElement("div", {
+    ref: canvasRef,
+    style: style
+  });
+};
+
+ChartPlugin.defaultProps = {
+  visualization: {},
+  filters: {},
+  forDashboard: false,
+  style: {},
+  animation: 200,
+  onError: Function.prototype,
+  onChartGenerated: Function.prototype,
+  onLoadingComplete: Function.prototype,
+  onResponsesReceived: Function.prototype
+};
+ChartPlugin.propTypes = {
+  d2: PropTypes.object.isRequired,
+  visualization: PropTypes.object.isRequired,
+  onError: PropTypes.func.isRequired,
+  animation: PropTypes.number,
+  filters: PropTypes.object,
+  forDashboard: PropTypes.bool,
+  id: PropTypes.number,
+  style: PropTypes.object,
+  onChartGenerated: PropTypes.func,
+  onLoadingComplete: PropTypes.func,
+  onResponsesReceived: PropTypes.func
+};
+
+var getRequestOptions$1 = function getRequestOptions(visualization, filters) {
+  var options = getOptionsForRequest().reduce(function (map, _ref) {
+    var _ref2 = _slicedToArray(_ref, 2),
+        option = _ref2[0],
+        props = _ref2[1];
+
+    // only add parameter if value !== default
+    if (visualization[option] !== undefined && visualization[option] !== props.defaultValue) {
+      map[option] = visualization[option];
+    }
+
+    return map;
+  }, {}); // interpretation filter
+
+  if (filters.relativePeriodDate) {
+    options.relativePeriodDate = filters.relativePeriodDate;
+  } // global filters
+  // userOrgUnit
+
+
+  if (filters.userOrgUnit && filters.userOrgUnit.length) {
+    var ouIds = filters.userOrgUnit.map(function (ouPath) {
+      return ouPath.split('/').slice(-1)[0];
+    });
+    options.userOrgUnit = ouIds.join(';');
+  }
+
+  return options;
+};
+
 var PivotPlugin = function PivotPlugin(_ref3) {
-  var config = _ref3.config,
+  var visualization = _ref3.visualization,
       filters = _ref3.filters,
       style = _ref3.style,
       onError = _ref3.onError,
@@ -764,8 +682,8 @@ var PivotPlugin = function PivotPlugin(_ref3) {
       setData = _useState2[1];
 
   React.useEffect(function () {
-    var options = getRequestOptions(config, filters);
-    apiFetchAnalytics(d2, config, options).then(function (responses) {
+    var options = getRequestOptions$1(visualization, filters);
+    apiFetchAnalytics(d2, visualization, options).then(function (responses) {
       if (!responses.length) {
         return;
       }
@@ -779,20 +697,20 @@ var PivotPlugin = function PivotPlugin(_ref3) {
     }).catch(function (error) {
       onError(error);
     }); // TODO: cancellation
-  }, [config, filters, onResponsesReceived, onError, d2, onLoadingComplete]);
+  }, [visualization, filters, onResponsesReceived, onError, d2, onLoadingComplete]);
   return React__default.createElement("div", {
     style: _objectSpread2({
       width: '100%',
       height: '100%'
     }, style)
   }, !data ? null : React__default.createElement(analytics.PivotTable, {
-    visualization: config,
+    visualization: visualization,
     data: data
   }));
 };
 
 PivotPlugin.defaultProps = {
-  config: {},
+  visualization: {},
   filters: {},
   style: {},
   onError: Function.prototype,
@@ -800,8 +718,8 @@ PivotPlugin.defaultProps = {
   onResponsesReceived: Function.prototype
 };
 PivotPlugin.propTypes = {
-  config: PropTypes.object.isRequired,
   d2: PropTypes.object.isRequired,
+  visualization: PropTypes.object.isRequired,
   onError: PropTypes.func.isRequired,
   filters: PropTypes.object,
   style: PropTypes.object,
@@ -810,7 +728,7 @@ PivotPlugin.propTypes = {
 };
 
 var VisualizationPlugin = function VisualizationPlugin(props) {
-  if (!props.config.type || props.config.type === analytics.VIS_TYPE_PIVOT_TABLE) {
+  if (!props.visualization.type || props.visualization.type === analytics.VIS_TYPE_PIVOT_TABLE) {
     return React__default.createElement(PivotPlugin, props);
   } else {
     return React__default.createElement(ChartPlugin, props);
