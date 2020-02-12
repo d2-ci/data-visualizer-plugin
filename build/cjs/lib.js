@@ -10,6 +10,42 @@ var PropTypes = _interopDefault(require('prop-types'));
 var i18n = _interopDefault(require('@dhis2/d2-i18n'));
 require('lodash-es/pick');
 
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+  try {
+    var info = gen[key](arg);
+    var value = info.value;
+  } catch (error) {
+    reject(error);
+    return;
+  }
+
+  if (info.done) {
+    resolve(value);
+  } else {
+    Promise.resolve(value).then(_next, _throw);
+  }
+}
+
+function _asyncToGenerator(fn) {
+  return function () {
+    var self = this,
+        args = arguments;
+    return new Promise(function (resolve, reject) {
+      var gen = fn.apply(self, args);
+
+      function _next(value) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+      }
+
+      function _throw(err) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+      }
+
+      _next(undefined);
+    });
+  };
+}
+
 function _defineProperty(obj, key, value) {
   if (key in obj) {
     Object.defineProperty(obj, key, {
@@ -102,71 +138,91 @@ function _nonIterableRest() {
 }
 
 var peId = 'pe';
-var apiFetchAnalytics = function apiFetchAnalytics(d2, current, options) {
-  var req, rawResponse;
-  return regeneratorRuntime.async(function apiFetchAnalytics$(_context) {
-    while (1) {
-      switch (_context.prev = _context.next) {
-        case 0:
-          req = new d2.analytics.request().fromModel(current).withParameters(options);
-          _context.next = 3;
-          return regeneratorRuntime.awrap(d2.analytics.aggregate.get(req));
+var apiFetchAnalytics =
+/*#__PURE__*/
+function () {
+  var _ref = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee(d2, current, options) {
+    var req, rawResponse;
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            req = new d2.analytics.request().fromModel(current).withParameters(options);
+            _context.next = 3;
+            return d2.analytics.aggregate.get(req);
 
-        case 3:
-          rawResponse = _context.sent;
-          return _context.abrupt("return", [new d2.analytics.response(rawResponse)]);
+          case 3:
+            rawResponse = _context.sent;
+            return _context.abrupt("return", [new d2.analytics.response(rawResponse)]);
 
-        case 5:
-        case "end":
-          return _context.stop();
+          case 5:
+          case "end":
+            return _context.stop();
+        }
       }
-    }
-  });
-};
-var apiFetchAnalyticsForYearOverYear = function apiFetchAnalyticsForYearOverYear(d2, current, options) {
-  var yearlySeriesReq, yearlySeriesRes, requests, yearlySeriesLabels, now, currentDay, currentMonth;
-  return regeneratorRuntime.async(function apiFetchAnalyticsForYearOverYear$(_context2) {
-    while (1) {
-      switch (_context2.prev = _context2.next) {
-        case 0:
-          yearlySeriesReq = new d2.analytics.request().addPeriodDimension(current.yearlySeries).withSkipData(true).withSkipMeta(false).withIncludeMetadataDetails(true);
+    }, _callee);
+  }));
 
-          if (options.relativePeriodDate) {
-            yearlySeriesReq = yearlySeriesReq.withRelativePeriodDate(options.relativePeriodDate);
-          }
+  return function apiFetchAnalytics(_x, _x2, _x3) {
+    return _ref.apply(this, arguments);
+  };
+}();
+var apiFetchAnalyticsForYearOverYear =
+/*#__PURE__*/
+function () {
+  var _ref2 = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee2(d2, current, options) {
+    var yearlySeriesReq, yearlySeriesRes, requests, yearlySeriesLabels, now, currentDay, currentMonth;
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            yearlySeriesReq = new d2.analytics.request().addPeriodDimension(current.yearlySeries).withSkipData(true).withSkipMeta(false).withIncludeMetadataDetails(true);
 
-          _context2.next = 4;
-          return regeneratorRuntime.awrap(d2.analytics.aggregate.fetch(yearlySeriesReq));
+            if (options.relativePeriodDate) {
+              yearlySeriesReq = yearlySeriesReq.withRelativePeriodDate(options.relativePeriodDate);
+            }
 
-        case 4:
-          yearlySeriesRes = _context2.sent;
-          requests = [];
-          yearlySeriesLabels = [];
-          now = new Date();
-          currentDay = ('' + now.getDate()).padStart(2, 0);
-          currentMonth = ('' + (now.getMonth() + 1)).padStart(2, 0);
-          yearlySeriesRes.metaData.dimensions[peId].forEach(function (period) {
-            yearlySeriesLabels.push(yearlySeriesRes.metaData.items[period].name);
-            var startDate = "".concat(period, "-").concat(currentMonth, "-").concat(currentDay);
-            var req = new d2.analytics.request().fromModel(current).withParameters(options).withRelativePeriodDate(startDate);
-            requests.push(d2.analytics.aggregate.get(req));
-          });
-          return _context2.abrupt("return", Promise.all(requests).then(function (responses) {
-            return {
-              responses: responses.map(function (res) {
-                return new d2.analytics.response(res);
-              }),
-              yearlySeriesLabels: yearlySeriesLabels
-            };
-          }));
+            _context2.next = 4;
+            return d2.analytics.aggregate.fetch(yearlySeriesReq);
 
-        case 12:
-        case "end":
-          return _context2.stop();
+          case 4:
+            yearlySeriesRes = _context2.sent;
+            requests = [];
+            yearlySeriesLabels = [];
+            now = new Date();
+            currentDay = ('' + now.getDate()).padStart(2, 0);
+            currentMonth = ('' + (now.getMonth() + 1)).padStart(2, 0);
+            yearlySeriesRes.metaData.dimensions[peId].forEach(function (period) {
+              yearlySeriesLabels.push(yearlySeriesRes.metaData.items[period].name);
+              var startDate = "".concat(period, "-").concat(currentMonth, "-").concat(currentDay);
+              var req = new d2.analytics.request().fromModel(current).withParameters(options).withRelativePeriodDate(startDate);
+              requests.push(d2.analytics.aggregate.get(req));
+            });
+            return _context2.abrupt("return", Promise.all(requests).then(function (responses) {
+              return {
+                responses: responses.map(function (res) {
+                  return new d2.analytics.response(res);
+                }),
+                yearlySeriesLabels: yearlySeriesLabels
+              };
+            }));
+
+          case 12:
+          case "end":
+            return _context2.stop();
+        }
       }
-    }
-  });
-};
+    }, _callee2);
+  }));
+
+  return function apiFetchAnalyticsForYearOverYear(_x4, _x5, _x6) {
+    return _ref2.apply(this, arguments);
+  };
+}();
 
 var options = {
   baseLineLabel: {
@@ -425,73 +481,83 @@ var getRequestOptions = function getRequestOptions(visualization, filters) {
   return options;
 };
 
-var fetchData = function fetchData(_ref3) {
-  var visualization, filters, d2, forDashboard, options, extraOptions, _ref4, _responses, yearlySeriesLabels, responses;
+var fetchData =
+/*#__PURE__*/
+function () {
+  var _ref4 = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee(_ref3) {
+    var visualization, filters, d2, forDashboard, options, extraOptions, _ref5, _responses, yearlySeriesLabels, responses;
 
-  return regeneratorRuntime.async(function fetchData$(_context) {
-    while (1) {
-      switch (_context.prev = _context.next) {
-        case 0:
-          visualization = _ref3.visualization, filters = _ref3.filters, d2 = _ref3.d2, forDashboard = _ref3.forDashboard;
-          options = getRequestOptions(visualization, filters);
-          extraOptions = {
-            dashboard: forDashboard,
-            noData: {
-              text: i18n.t('No data')
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            visualization = _ref3.visualization, filters = _ref3.filters, d2 = _ref3.d2, forDashboard = _ref3.forDashboard;
+            options = getRequestOptions(visualization, filters);
+            extraOptions = {
+              dashboard: forDashboard,
+              noData: {
+                text: i18n.t('No data')
+              }
+            };
+
+            if (!analytics.isYearOverYear(visualization.type)) {
+              _context.next = 10;
+              break;
             }
-          };
 
-          if (!analytics.isYearOverYear(visualization.type)) {
-            _context.next = 10;
-            break;
-          }
+            _context.next = 6;
+            return apiFetchAnalyticsForYearOverYear(d2, visualization, options);
 
-          _context.next = 6;
-          return regeneratorRuntime.awrap(apiFetchAnalyticsForYearOverYear(d2, visualization, options));
+          case 6:
+            _ref5 = _context.sent;
+            _responses = _ref5.responses;
+            yearlySeriesLabels = _ref5.yearlySeriesLabels;
+            return _context.abrupt("return", {
+              responses: _responses,
+              extraOptions: _objectSpread2({}, extraOptions, {
+                yearlySeries: yearlySeriesLabels,
+                xAxisLabels: computeGenericPeriodNames(_responses)
+              })
+            });
 
-        case 6:
-          _ref4 = _context.sent;
-          _responses = _ref4.responses;
-          yearlySeriesLabels = _ref4.yearlySeriesLabels;
-          return _context.abrupt("return", {
-            responses: _responses,
-            extraOptions: _objectSpread2({}, extraOptions, {
-              yearlySeries: yearlySeriesLabels,
-              xAxisLabels: computeGenericPeriodNames(_responses)
-            })
-          });
+          case 10:
+            _context.next = 12;
+            return apiFetchAnalytics(d2, visualization, options);
 
-        case 10:
-          _context.next = 12;
-          return regeneratorRuntime.awrap(apiFetchAnalytics(d2, visualization, options));
+          case 12:
+            responses = _context.sent;
+            return _context.abrupt("return", {
+              responses: responses,
+              extraOptions: extraOptions
+            });
 
-        case 12:
-          responses = _context.sent;
-          return _context.abrupt("return", {
-            responses: responses,
-            extraOptions: extraOptions
-          });
-
-        case 14:
-        case "end":
-          return _context.stop();
+          case 14:
+          case "end":
+            return _context.stop();
+        }
       }
-    }
-  });
-};
+    }, _callee);
+  }));
 
-var ChartPlugin = function ChartPlugin(_ref5) {
-  var visualization = _ref5.visualization,
-      filters = _ref5.filters,
-      id = _ref5.id,
-      style = _ref5.style,
-      d2 = _ref5.d2,
-      forDashboard = _ref5.forDashboard,
-      onResponsesReceived = _ref5.onResponsesReceived,
-      onChartGenerated = _ref5.onChartGenerated,
-      onError = _ref5.onError,
-      onLoadingComplete = _ref5.onLoadingComplete,
-      defaultAnimation = _ref5.animation;
+  return function fetchData(_x) {
+    return _ref4.apply(this, arguments);
+  };
+}();
+
+var ChartPlugin = function ChartPlugin(_ref6) {
+  var visualization = _ref6.visualization,
+      filters = _ref6.filters,
+      id = _ref6.id,
+      style = _ref6.style,
+      d2 = _ref6.d2,
+      forDashboard = _ref6.forDashboard,
+      onResponsesReceived = _ref6.onResponsesReceived,
+      onChartGenerated = _ref6.onChartGenerated,
+      onError = _ref6.onError,
+      onLoadingComplete = _ref6.onLoadingComplete,
+      defaultAnimation = _ref6.animation;
   var canvasRef = React.useRef(undefined);
   var fetchResult = React.useRef(undefined);
   var renderVisualization = React.useCallback(function (animation) {
