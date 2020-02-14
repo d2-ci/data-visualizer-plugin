@@ -1,8 +1,7 @@
 import React from 'react'
-import { shallow } from 'enzyme'
+import { mount } from 'enzyme'
 import * as analytics from '@dhis2/analytics'
 
-import LoadingMask from '../widgets/LoadingMask'
 import ChartPlugin from '../ChartPlugin'
 import * as api from '../api/analytics'
 import * as options from '../modules/options'
@@ -109,17 +108,17 @@ describe('ChartPlugin', () => {
         ['option2', { defaultValue: null }],
     ]
     let props
-    let shallowChartPlugin
+    let chartPlugin
     const canvas = () => {
-        if (!shallowChartPlugin) {
-            shallowChartPlugin = shallow(<ChartPlugin {...props} />)
+        if (!chartPlugin) {
+            chartPlugin = mount(<ChartPlugin {...props} />)
         }
-        return shallowChartPlugin
+        return chartPlugin
     }
 
     beforeEach(() => {
         props = {
-            config: {},
+            visualization: {},
             filters: {},
             style: { height: 100 },
             id: 1,
@@ -129,20 +128,11 @@ describe('ChartPlugin', () => {
             onResponsesReceived: jest.fn(),
             onError: jest.fn(),
         }
-        shallowChartPlugin = undefined
+        chartPlugin = undefined
 
         api.apiFetchAnalytics = jest
             .fn()
             .mockResolvedValue([new MockAnalyticsResponse()])
-    })
-
-    it('renders the loading indicator', () => {
-        props.loading = true
-        expect(
-            canvas()
-                .find(LoadingMask)
-                .exists()
-        ).toBeTruthy()
     })
 
     describe('createVisualization success', () => {
@@ -176,7 +166,7 @@ describe('ChartPlugin', () => {
         })
 
         it('includes only options that do not have default value in request', done => {
-            props.config = {
+            props.visualization = {
                 ...defaultCurrentMock,
                 option1: 'def',
                 option2: null,
@@ -248,7 +238,7 @@ describe('ChartPlugin', () => {
 
         describe('Year-on-year chart', () => {
             beforeEach(() => {
-                props.config = {
+                props.visualization = {
                     ...yearOverYearCurrentMock,
                     option1: 'def',
                 }
@@ -260,7 +250,7 @@ describe('ChartPlugin', () => {
                 analytics.isYearOverYear = jest
                     .fn()
                     .mockReturnValue(
-                        isYearOverYearMockResponse(props.config.type)
+                        isYearOverYearMockResponse(props.visualization.type)
                     )
             })
 
@@ -309,14 +299,14 @@ describe('ChartPlugin', () => {
 
         describe('Single value visualization', () => {
             beforeEach(() => {
-                props.config = {
+                props.visualization = {
                     ...singleValueCurrentMock,
                 }
 
                 analytics.isSingleValue = jest
                     .fn()
                     .mockReturnValue(
-                        isSingleValueMockResponse(props.config.type)
+                        isSingleValueMockResponse(props.visualization.type)
                     )
             })
 
