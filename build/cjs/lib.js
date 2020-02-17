@@ -771,6 +771,7 @@ var VisualizationPlugin = function VisualizationPlugin(props) {
       legendSet = _useState2[0],
       setLegendSet = _useState2[1];
 
+  var hasLegendSet = props.visualization.legendSet && props.visualization.legendSet.id;
   React.useEffect(function () {
     var fetchLegendSet =
     /*#__PURE__*/
@@ -813,6 +814,12 @@ var VisualizationPlugin = function VisualizationPlugin(props) {
 
     fetchLegendSet(engine);
   }, [props.visualization.legendSet]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (hasLegendSet && !legendSet) {
+    // Until one of the children is rendered and calls onLoadingComplete,
+    // the app will continue to render the loading spinner
+    return null;
+  }
 
   if (!props.visualization.type || props.visualization.type === analytics.VIS_TYPE_PIVOT_TABLE) {
     return React__default.createElement(PivotPlugin, _extends({}, props, {
