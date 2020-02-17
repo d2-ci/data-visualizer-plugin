@@ -15,7 +15,10 @@ const VisualizationPlugin = props => {
 
     useEffect(() => {
         const fetchLegendSet = async engine => {
-            if (hasLegendSet) {
+            if (
+                props.visualization.legendSet &&
+                props.visualization.legendSet.id
+            ) {
                 const response = await apiFetchLegendSet(
                     engine,
                     props.visualization.legendSet.id
@@ -28,7 +31,7 @@ const VisualizationPlugin = props => {
         }
 
         fetchLegendSet(engine)
-    }, [props.visualization.legendSet]) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [engine, props.visualization.legendSet])
 
     if (hasLegendSet && !legendSet) {
         // Until one of the children is rendered and calls onLoadingComplete,

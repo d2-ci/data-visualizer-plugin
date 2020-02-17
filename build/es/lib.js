@@ -779,7 +779,7 @@ var VisualizationPlugin = function VisualizationPlugin(props) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                if (!hasLegendSet) {
+                if (!(props.visualization.legendSet && props.visualization.legendSet.id)) {
                   _context.next = 5;
                   break;
                 }
@@ -808,7 +808,7 @@ var VisualizationPlugin = function VisualizationPlugin(props) {
     }();
 
     fetchLegendSet(engine);
-  }, [props.visualization.legendSet]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [engine, props.visualization.legendSet]);
 
   if (hasLegendSet && !legendSet) {
     // Until one of the children is rendered and calls onLoadingComplete,
