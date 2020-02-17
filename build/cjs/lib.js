@@ -263,198 +263,252 @@ function () {
 var options = {
   baseLineLabel: {
     defaultValue: undefined,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   baseLineValue: {
     defaultValue: undefined,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   // colorSet:
   cumulativeValues: {
     defaultValue: false,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   domainAxisLabel: {
     defaultValue: undefined,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   hideEmptyRowItems: {
     defaultValue: 'NONE',
-    requestable: false
+    requestable: false,
+    savable: true
   },
   hideLegend: {
     defaultValue: false,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   noSpaceBetweenColumns: {
     defaultValue: false,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   percentStackedValues: {
     defaultValue: false,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   rangeAxisDecimals: {
     defaultValue: undefined,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   rangeAxisLabel: {
     defaultValue: undefined,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   rangeAxisMaxValue: {
     defaultValue: undefined,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   rangeAxisMinValue: {
     defaultValue: undefined,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   rangeAxisSteps: {
     defaultValue: undefined,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   regressionType: {
     defaultValue: 'NONE',
-    requestable: false
+    requestable: false,
+    savable: true
   },
   showData: {
     defaultValue: true,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   targetLineLabel: {
     defaultValue: undefined,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   targetLineValue: {
     defaultValue: undefined,
-    requestable: false
+    requestable: false,
+    savable: true
   },
-  // legendDisplayStrategy
-  // legendSet
   aggregationType: {
     defaultValue: 'DEFAULT',
-    requestable: true
+    requestable: true,
+    savable: true
   },
   completedOnly: {
     defaultValue: false,
-    requestable: true
+    requestable: true,
+    savable: true
   },
   hideSubtitle: {
     defaultValue: false,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   hideTitle: {
     defaultValue: false,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   sortOrder: {
     defaultValue: '0',
-    requestable: false
+    requestable: false,
+    savable: true
   },
   subtitle: {
     defaultValue: undefined,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   title: {
     defaultValue: undefined,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   // only for PT XXX
   colTotals: {
     defaultValue: false,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   colSubTotals: {
     defaultValue: false,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   rowTotals: {
     defaultValue: false,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   rowSubTotals: {
     defaultValue: false,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   showDimensionLabels: {
     defaultValue: false,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   hideEmptyColumns: {
     defaultValue: false,
-    requestable: true
+    requestable: true,
+    savable: true
   },
   hideEmptyRows: {
     defaultValue: false,
-    requestable: true
+    requestable: true,
+    savable: true
   },
   skipRounding: {
     defaultValue: false,
-    requestable: true
+    requestable: true,
+    savable: true
   },
   numberType: {
     defaultValue: 'VALUE',
-    requestable: false
+    requestable: false,
+    savable: true
   },
   showHierarchy: {
     defaultValue: false,
-    requestable: true
+    requestable: true,
+    savable: true
   },
   legendSet: {
-    defaultValue: 'NONE',
-    requestable: false
+    defaultValue: undefined,
+    requestable: false,
+    savable: true
   },
-  // XXX can be 'BY_DATA_ITEM'
+  legendDisplayStrategy: {
+    defaultValue: undefined,
+    requestable: false,
+    savable: true
+  },
   legendDisplayStyle: {
     defaultValue: 'FILL',
-    requestable: false
+    requestable: false,
+    savable: true
   },
   displayDensity: {
     defaultValue: 'NORMAL',
-    requestable: false
+    requestable: false,
+    savable: true
   },
   fontSize: {
     defaultValue: 'NORMAL',
-    requestable: false
+    requestable: false,
+    savable: true
   },
   digitGroupSeparator: {
     defaultValue: 'SPACE',
-    requestable: false
+    requestable: false,
+    savable: true
   },
-  // XXX these are stored in the AO under reportParams
-  paramReportingPeriod: {
-    defaultValue: false,
-    requestable: false
+  approvalLevel: {
+    defaultValue: undefined,
+    requestable: true,
+    savable: false
   },
-  paramOrganisationUnit: {
+  // these are stored in the AO under reportingParams
+  reportingPeriod: {
     defaultValue: false,
-    requestable: false
+    requestable: false,
+    savable: true
   },
-  paramParentOrganisationUnit: {
+  organisationUnit: {
     defaultValue: false,
-    requestable: false
+    requestable: false,
+    savable: true
   },
-  // XXX not in UI
-  paramGrandParentOrganisationUnit: {
+  parentOrganisationUnit: {
     defaultValue: false,
-    requestable: false
+    requestable: false,
+    savable: true
+  },
+  // not exposed in UI
+  grandParentOrganisationUnit: {
+    defaultValue: false,
+    requestable: false,
+    savable: true
   },
   regression: {
     defaultValue: false,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   cumulative: {
     defaultValue: false,
-    requestable: false
+    requestable: false,
+    savable: true
   },
   measureCriteria: {
     defaultValue: undefined,
-    requestable: true
+    requestable: true,
+    savable: true
   },
   topLimit: {
     defaultValue: '0',
-    requestable: false
+    requestable: false,
+    savable: true
   }
 };
 var getOptionsForRequest = function getOptionsForRequest() {
