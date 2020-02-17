@@ -6,6 +6,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var React = require('react');
 var React__default = _interopDefault(React);
 var analytics = require('@dhis2/analytics');
+var appRuntime = require('@dhis2/app-runtime');
 var PropTypes = _interopDefault(require('prop-types'));
 var i18n = _interopDefault(require('@dhis2/d2-i18n'));
 require('lodash-es/pick');
@@ -59,6 +60,24 @@ function _defineProperty(obj, key, value) {
   }
 
   return obj;
+}
+
+function _extends() {
+  _extends = Object.assign || function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+
+    return target;
+  };
+
+  return _extends.apply(this, arguments);
 }
 
 function ownKeys(object, enumerableOnly) {
@@ -136,6 +155,23 @@ function _iterableToArrayLimit(arr, i) {
 function _nonIterableRest() {
   throw new TypeError("Invalid attempt to destructure non-iterable instance");
 }
+
+var legendSetQuery = {
+  legendSet: {
+    resource: 'legendSets',
+    id: function id(_ref) {
+      var _id = _ref.id;
+      return _id;
+    }
+  }
+};
+var apiFetchLegendSet = function apiFetchLegendSet(dataEngine, id) {
+  return dataEngine.query(legendSetQuery, {
+    variables: {
+      id: id
+    }
+  });
+};
 
 var peId = 'pe';
 var apiFetchAnalytics =
@@ -728,10 +764,71 @@ PivotPlugin.propTypes = {
 };
 
 var VisualizationPlugin = function VisualizationPlugin(props) {
+  var engine = appRuntime.useDataEngine();
+
+  var _useState = React.useState(null),
+      _useState2 = _slicedToArray(_useState, 2),
+      legendSet = _useState2[0],
+      setLegendSet = _useState2[1];
+
+  var hasLegendSet = props.visualization.legendSet && props.visualization.legendSet.id;
+  React.useEffect(function () {
+    var fetchLegendSet =
+    /*#__PURE__*/
+    function () {
+      var _ref = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee(engine) {
+        var response;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                if (!(props.visualization.legendSet && props.visualization.legendSet.id)) {
+                  _context.next = 5;
+                  break;
+                }
+
+                _context.next = 3;
+                return apiFetchLegendSet(engine, props.visualization.legendSet.id);
+
+              case 3:
+                response = _context.sent;
+
+                if (response && response.legendSet) {
+                  setLegendSet(response.legendSet);
+                }
+
+              case 5:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }));
+
+      return function fetchLegendSet(_x) {
+        return _ref.apply(this, arguments);
+      };
+    }();
+
+    fetchLegendSet(engine);
+  }, [engine, props.visualization.legendSet]);
+
+  if (hasLegendSet && !legendSet) {
+    // Until one of the children is rendered and calls onLoadingComplete,
+    // the app will continue to render the loading spinner
+    return null;
+  }
+
   if (!props.visualization.type || props.visualization.type === analytics.VIS_TYPE_PIVOT_TABLE) {
-    return React__default.createElement(PivotPlugin, props);
+    return React__default.createElement(PivotPlugin, _extends({}, props, {
+      legendSet: legendSet
+    }));
   } else {
-    return React__default.createElement(ChartPlugin, props);
+    return React__default.createElement(ChartPlugin, _extends({}, props, {
+      legendSet: legendSet
+    }));
   }
 };
 
