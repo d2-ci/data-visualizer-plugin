@@ -779,7 +779,7 @@ var VisualizationPlugin = function VisualizationPlugin(props) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                if (!(props.visualization.legendSet && props.visualization.legendSet.id)) {
+                if (!hasLegendSet) {
                   _context.next = 5;
                   break;
                 }
