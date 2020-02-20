@@ -1,6 +1,6 @@
 /* eslint-disable */
 import React, { useRef, useCallback, useEffect, useState } from 'react';
-import { createVisualization, isSingleValue, isYearOverYear, PivotTable, VIS_TYPE_PIVOT_TABLE } from '@dhis2/analytics';
+import { createVisualization, isSingleValue, PivotTable, isYearOverYear, VIS_TYPE_PIVOT_TABLE } from '@dhis2/analytics';
 import { useDataEngine } from '@dhis2/app-runtime';
 import PropTypes from 'prop-types';
 import i18n from '@dhis2/d2-i18n';
@@ -109,6 +109,42 @@ function _objectSpread2(target) {
   return target;
 }
 
+function _objectWithoutPropertiesLoose(source, excluded) {
+  if (source == null) return {};
+  var target = {};
+  var sourceKeys = Object.keys(source);
+  var key, i;
+
+  for (i = 0; i < sourceKeys.length; i++) {
+    key = sourceKeys[i];
+    if (excluded.indexOf(key) >= 0) continue;
+    target[key] = source[key];
+  }
+
+  return target;
+}
+
+function _objectWithoutProperties(source, excluded) {
+  if (source == null) return {};
+
+  var target = _objectWithoutPropertiesLoose(source, excluded);
+
+  var key, i;
+
+  if (Object.getOwnPropertySymbols) {
+    var sourceSymbolKeys = Object.getOwnPropertySymbols(source);
+
+    for (i = 0; i < sourceSymbolKeys.length; i++) {
+      key = sourceSymbolKeys[i];
+      if (excluded.indexOf(key) >= 0) continue;
+      if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue;
+      target[key] = source[key];
+    }
+  }
+
+  return target;
+}
+
 function _slicedToArray(arr, i) {
   return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
 }
@@ -166,6 +202,89 @@ var apiFetchLegendSet = function apiFetchLegendSet(dataEngine, id) {
       id: id
     }
   });
+};
+
+var ChartPlugin = function ChartPlugin(_ref) {
+  var visualization = _ref.visualization,
+      responses = _ref.responses,
+      extraOptions = _ref.extraOptions,
+      renderCounter = _ref.id,
+      style = _ref.style,
+      onChartGenerated = _ref.onChartGenerated,
+      defaultAnimation = _ref.animation;
+  var canvasRef = useRef(undefined);
+  var renderVisualization = useCallback(function (animation) {
+    var visualizationConfig = createVisualization(responses, visualization, canvasRef.current, _objectSpread2({}, extraOptions, {
+      animation: animation
+    }), undefined, undefined, isSingleValue(visualization.type) ? 'dhis' : 'highcharts' // output format
+    );
+
+    if (isSingleValue(visualization.type)) {
+      onChartGenerated(visualizationConfig.visualization);
+    } else {
+      onChartGenerated(visualizationConfig.visualization.getSVGForExport({
+        sourceHeight: 768,
+        sourceWidth: 1024
+      }));
+    }
+  }, [canvasRef, visualization, onChartGenerated, responses, extraOptions]);
+  useEffect(function () {
+    renderVisualization(defaultAnimation);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [visualization, responses, extraOptions]);
+  useEffect(function () {
+    renderVisualization(0);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [renderCounter, style]);
+  return React.createElement("div", {
+    ref: canvasRef,
+    style: style
+  });
+};
+
+ChartPlugin.defaultProps = {
+  visualization: {},
+  filters: {},
+  style: {},
+  animation: 200,
+  onChartGenerated: Function.prototype
+};
+ChartPlugin.propTypes = {
+  extraOptions: PropTypes.object.isRequired,
+  // legendSets: PropTypes.arrayOf(PropTypes.object).isRequired,
+  responses: PropTypes.arrayOf(PropTypes.object).isRequired,
+  visualization: PropTypes.object.isRequired,
+  animation: PropTypes.number,
+  id: PropTypes.number,
+  style: PropTypes.object,
+  onChartGenerated: PropTypes.func
+};
+
+var PivotPlugin = function PivotPlugin(_ref) {
+  var responses = _ref.responses,
+      legendSets = _ref.legendSets,
+      visualization = _ref.visualization,
+      style = _ref.style;
+  return React.createElement("div", {
+    style: _objectSpread2({
+      width: '100%',
+      height: '100%'
+    }, style)
+  }, React.createElement(PivotTable, {
+    visualization: visualization,
+    data: responses[0].response,
+    legendSets: legendSets
+  }));
+};
+
+PivotPlugin.defaultProps = {
+  style: {}
+};
+PivotPlugin.propTypes = {
+  legendSets: PropTypes.arrayOf(PropTypes.object).isRequired,
+  responses: PropTypes.arrayOf(PropTypes.object).isRequired,
+  visualization: PropTypes.object.isRequired,
+  style: PropTypes.object
 };
 
 var peId = 'pe';
@@ -254,6 +373,29 @@ function () {
     return _ref2.apply(this, arguments);
   };
 }();
+
+var computeGenericPeriodNames = function computeGenericPeriodNames(responses) {
+  var xAxisRes = responses.reduce(function (out, res) {
+    if (out.metaData) {
+      if (res.metaData.dimensions.pe.length > out.metaData.dimensions.pe.length) {
+        out = res;
+      }
+    } else {
+      out = res;
+    }
+
+    return out;
+  }, {});
+  var metadata = xAxisRes.metaData;
+  return metadata.dimensions.pe.reduce(function (genericPeriodNames, periodId) {
+    var name = metadata.items[periodId].name; // until the day the backend will support this in the API:
+    // trim off the trailing year in the period name
+    // english names should all have the year at the end of the string
+
+    genericPeriodNames.push(name.replace(/\s+\d{4}$/, ''));
+    return genericPeriodNames;
+  }, []);
+};
 
 var options = {
   baseLineLabel: {
@@ -513,29 +655,6 @@ var getOptionsForRequest = function getOptionsForRequest() {
   );
 };
 
-var computeGenericPeriodNames = function computeGenericPeriodNames(responses) {
-  var xAxisRes = responses.reduce(function (out, res) {
-    if (out.metaData) {
-      if (res.metaData.dimensions.pe.length > out.metaData.dimensions.pe.length) {
-        out = res;
-      }
-    } else {
-      out = res;
-    }
-
-    return out;
-  }, {});
-  var metadata = xAxisRes.metaData;
-  return metadata.dimensions.pe.reduce(function (genericPeriodNames, periodId) {
-    var name = metadata.items[periodId].name; // until the day the backend will support this in the API:
-    // trim off the trailing year in the period name
-    // english names should all have the year at the end of the string
-
-    genericPeriodNames.push(name.replace(/\s+\d{4}$/, ''));
-    return genericPeriodNames;
-  }, []);
-};
-
 var getRequestOptions = function getRequestOptions(visualization, filters) {
   var options = getOptionsForRequest().reduce(function (map, _ref) {
     var _ref2 = _slicedToArray(_ref, 2),
@@ -569,16 +688,16 @@ var getRequestOptions = function getRequestOptions(visualization, filters) {
 var fetchData =
 /*#__PURE__*/
 function () {
-  var _ref4 = _asyncToGenerator(
+  var _ref2 = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee(_ref3) {
-    var visualization, filters, d2, forDashboard, options, extraOptions, _ref5, _responses, yearlySeriesLabels, responses;
+  regeneratorRuntime.mark(function _callee(_ref) {
+    var visualization, filters, d2, forDashboard, options, extraOptions, _ref3, responses, yearlySeriesLabels;
 
     return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            visualization = _ref3.visualization, filters = _ref3.filters, d2 = _ref3.d2, forDashboard = _ref3.forDashboard;
+            visualization = _ref.visualization, filters = _ref.filters, d2 = _ref.d2, forDashboard = _ref.forDashboard;
             options = getRequestOptions(visualization, filters);
             extraOptions = {
               dashboard: forDashboard,
@@ -596,14 +715,14 @@ function () {
             return apiFetchAnalyticsForYearOverYear(d2, visualization, options);
 
           case 6:
-            _ref5 = _context.sent;
-            _responses = _ref5.responses;
-            yearlySeriesLabels = _ref5.yearlySeriesLabels;
+            _ref3 = _context.sent;
+            responses = _ref3.responses;
+            yearlySeriesLabels = _ref3.yearlySeriesLabels;
             return _context.abrupt("return", {
-              responses: _responses,
+              responses: responses,
               extraOptions: _objectSpread2({}, extraOptions, {
                 yearlySeries: yearlySeriesLabels,
-                xAxisLabels: computeGenericPeriodNames(_responses)
+                xAxisLabels: computeGenericPeriodNames(responses)
               })
             });
 
@@ -612,13 +731,14 @@ function () {
             return apiFetchAnalytics(d2, visualization, options);
 
           case 12:
-            responses = _context.sent;
+            _context.t0 = _context.sent;
+            _context.t1 = extraOptions;
             return _context.abrupt("return", {
-              responses: responses,
-              extraOptions: extraOptions
+              responses: _context.t0,
+              extraOptions: _context.t1
             });
 
-          case 14:
+          case 15:
           case "end":
             return _context.stop();
         }
@@ -627,258 +747,188 @@ function () {
   }));
 
   return function fetchData(_x) {
-    return _ref4.apply(this, arguments);
+    return _ref2.apply(this, arguments);
   };
 }();
 
-var ChartPlugin = function ChartPlugin(_ref6) {
-  var visualization = _ref6.visualization,
-      filters = _ref6.filters,
-      id = _ref6.id,
-      style = _ref6.style,
-      d2 = _ref6.d2,
-      forDashboard = _ref6.forDashboard,
-      onResponsesReceived = _ref6.onResponsesReceived,
-      onChartGenerated = _ref6.onChartGenerated,
-      onError = _ref6.onError,
-      onLoadingComplete = _ref6.onLoadingComplete,
-      defaultAnimation = _ref6.animation;
-  var canvasRef = useRef(undefined);
-  var fetchResult = useRef(undefined);
-  var renderVisualization = useCallback(function (animation) {
-    if (!fetchResult.current) return;
-    var _fetchResult$current = fetchResult.current,
-        responses = _fetchResult$current.responses,
-        extraOptions = _fetchResult$current.extraOptions;
-    var visualizationConfig = createVisualization(responses, visualization, canvasRef.current, _objectSpread2({}, extraOptions, {
-      animation: animation
-    }), undefined, undefined, isSingleValue(visualization.type) ? 'dhis' : 'highcharts' // output format
-    );
+var VisualizationPlugin = function VisualizationPlugin(_ref) {
+  var d2 = _ref.d2,
+      visualization = _ref.visualization,
+      filters = _ref.filters,
+      forDashboard = _ref.forDashboard,
+      onError = _ref.onError,
+      onLoadingComplete = _ref.onLoadingComplete,
+      onResponsesReceived = _ref.onResponsesReceived,
+      props = _objectWithoutProperties(_ref, ["d2", "visualization", "filters", "forDashboard", "onError", "onLoadingComplete", "onResponsesReceived"]);
 
-    if (isSingleValue(visualization.type)) {
-      onChartGenerated(visualizationConfig.visualization);
-    } else {
-      onChartGenerated(visualizationConfig.visualization.getSVGForExport({
-        sourceHeight: 768,
-        sourceWidth: 1024
-      }));
-    }
-  }, [canvasRef, visualization, onChartGenerated]);
-  var doFetch = useCallback(function (visualization, filters, forDashboard) {
-    fetchData({
-      visualization: visualization,
-      filters: filters,
-      d2: d2,
-      forDashboard: forDashboard
-    }).then(function (result) {
-      if (result.responses.length) {
-        onResponsesReceived(result.responses);
-      }
-
-      fetchResult.current = result;
-      renderVisualization(defaultAnimation);
-      onLoadingComplete();
-    }).catch(function (error) {
-      onError(error);
-    });
-  }, [d2, onResponsesReceived, onLoadingComplete, onError, renderVisualization, defaultAnimation]);
-  useEffect(function () {
-    doFetch(visualization, filters, forDashboard);
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [visualization, filters, forDashboard]);
-  useEffect(function () {
-    renderVisualization(0);
-  }, [id, style]);
-  /* eslint-disable-line react-hooks/exhaustive-deps */
-
-  return React.createElement("div", {
-    ref: canvasRef,
-    style: style
-  });
-};
-
-ChartPlugin.defaultProps = {
-  visualization: {},
-  filters: {},
-  forDashboard: false,
-  style: {},
-  animation: 200,
-  onError: Function.prototype,
-  onChartGenerated: Function.prototype,
-  onLoadingComplete: Function.prototype,
-  onResponsesReceived: Function.prototype
-};
-ChartPlugin.propTypes = {
-  d2: PropTypes.object.isRequired,
-  visualization: PropTypes.object.isRequired,
-  onError: PropTypes.func.isRequired,
-  animation: PropTypes.number,
-  filters: PropTypes.object,
-  forDashboard: PropTypes.bool,
-  id: PropTypes.number,
-  style: PropTypes.object,
-  onChartGenerated: PropTypes.func,
-  onLoadingComplete: PropTypes.func,
-  onResponsesReceived: PropTypes.func
-};
-
-var getRequestOptions$1 = function getRequestOptions(visualization, filters) {
-  var options = getOptionsForRequest().reduce(function (map, _ref) {
-    var _ref2 = _slicedToArray(_ref, 2),
-        option = _ref2[0],
-        props = _ref2[1];
-
-    // only add parameter if value !== default
-    if (visualization[option] !== undefined && visualization[option] !== props.defaultValue) {
-      map[option] = visualization[option];
-    }
-
-    return map;
-  }, {}); // interpretation filter
-
-  if (filters.relativePeriodDate) {
-    options.relativePeriodDate = filters.relativePeriodDate;
-  } // global filters
-  // userOrgUnit
-
-
-  if (filters.userOrgUnit && filters.userOrgUnit.length) {
-    var ouIds = filters.userOrgUnit.map(function (ouPath) {
-      return ouPath.split('/').slice(-1)[0];
-    });
-    options.userOrgUnit = ouIds.join(';');
-  }
-
-  return options;
-};
-
-var PivotPlugin = function PivotPlugin(_ref3) {
-  var visualization = _ref3.visualization,
-      filters = _ref3.filters,
-      style = _ref3.style,
-      onError = _ref3.onError,
-      onResponsesReceived = _ref3.onResponsesReceived,
-      d2 = _ref3.d2,
-      onLoadingComplete = _ref3.onLoadingComplete;
-
-  var _useState = useState(null),
-      _useState2 = _slicedToArray(_useState, 2),
-      data = _useState2[0],
-      setData = _useState2[1];
-
-  useEffect(function () {
-    var options = getRequestOptions$1(visualization, filters);
-    apiFetchAnalytics(d2, visualization, options).then(function (responses) {
-      if (!responses.length) {
-        return;
-      }
-
-      if (onResponsesReceived) {
-        onResponsesReceived(responses);
-      }
-
-      setData(responses[0].response);
-      onLoadingComplete();
-    }).catch(function (error) {
-      onError(error);
-    }); // TODO: cancellation
-  }, [visualization, filters, onResponsesReceived, onError, d2, onLoadingComplete]);
-  return React.createElement("div", {
-    style: _objectSpread2({
-      width: '100%',
-      height: '100%'
-    }, style)
-  }, !data ? null : React.createElement(PivotTable, {
-    visualization: visualization,
-    data: data
-  }));
-};
-
-PivotPlugin.defaultProps = {
-  visualization: {},
-  filters: {},
-  style: {},
-  onError: Function.prototype,
-  onLoadingComplete: Function.prototype,
-  onResponsesReceived: Function.prototype
-};
-PivotPlugin.propTypes = {
-  d2: PropTypes.object.isRequired,
-  visualization: PropTypes.object.isRequired,
-  onError: PropTypes.func.isRequired,
-  filters: PropTypes.object,
-  style: PropTypes.object,
-  onLoadingComplete: PropTypes.func,
-  onResponsesReceived: PropTypes.func
-};
-
-var VisualizationPlugin = function VisualizationPlugin(props) {
   var engine = useDataEngine();
 
   var _useState = useState(null),
       _useState2 = _slicedToArray(_useState, 2),
-      legendSet = _useState2[0],
-      setLegendSet = _useState2[1];
+      fetchResult = _useState2[0],
+      setFetchResult = _useState2[1];
 
-  var hasLegendSet = props.visualization.legendSet && props.visualization.legendSet.id;
+  var doFetchData = useCallback(
+  /*#__PURE__*/
+  _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee() {
+    var result;
+    return regeneratorRuntime.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            _context.next = 2;
+            return fetchData({
+              visualization: visualization,
+              filters: filters,
+              d2: d2,
+              forDashboard: forDashboard
+            });
+
+          case 2:
+            result = _context.sent;
+
+            if (result.responses.length) {
+              onResponsesReceived(result.responses);
+            }
+
+            return _context.abrupt("return", result);
+
+          case 5:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  })), [d2, filters, forDashboard, onResponsesReceived, visualization]);
+  var doFetchLegendSets = useCallback(
+  /*#__PURE__*/
+  _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee2() {
+    var response;
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            if (!(!visualization.legendSet || !visualization.legendSet.id)) {
+              _context2.next = 2;
+              break;
+            }
+
+            return _context2.abrupt("return", []);
+
+          case 2:
+            _context2.next = 4;
+            return apiFetchLegendSet(engine, visualization.legendSet.id);
+
+          case 4:
+            response = _context2.sent;
+
+            if (!(response && response.legendSet)) {
+              _context2.next = 7;
+              break;
+            }
+
+            return _context2.abrupt("return", [response.legendSet]);
+
+          case 7:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2);
+  })), [engine, visualization.legendSet]);
   useEffect(function () {
-    var fetchLegendSet =
+    setFetchResult(null);
+
+    var doFetchAll =
     /*#__PURE__*/
     function () {
-      var _ref = _asyncToGenerator(
+      var _ref4 = _asyncToGenerator(
       /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee(engine) {
-        var response;
-        return regeneratorRuntime.wrap(function _callee$(_context) {
+      regeneratorRuntime.mark(function _callee3() {
+        var _ref5, responses, extraOptions, legendSets;
+
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context.prev = _context.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
-                if (!(props.visualization.legendSet && props.visualization.legendSet.id)) {
-                  _context.next = 5;
-                  break;
-                }
+                _context3.next = 2;
+                return doFetchData(visualization, filters, forDashboard);
 
-                _context.next = 3;
-                return apiFetchLegendSet(engine, props.visualization.legendSet.id);
+              case 2:
+                _ref5 = _context3.sent;
+                responses = _ref5.responses;
+                extraOptions = _ref5.extraOptions;
+                _context3.next = 7;
+                return doFetchLegendSets();
 
-              case 3:
-                response = _context.sent;
+              case 7:
+                legendSets = _context3.sent;
+                setFetchResult({
+                  visualization: visualization,
+                  legendSets: legendSets,
+                  responses: responses,
+                  extraOptions: extraOptions
+                });
+                onLoadingComplete();
 
-                if (response && response.legendSet) {
-                  setLegendSet(response.legendSet);
-                }
-
-              case 5:
+              case 10:
               case "end":
-                return _context.stop();
+                return _context3.stop();
             }
           }
-        }, _callee);
+        }, _callee3);
       }));
 
-      return function fetchLegendSet(_x) {
-        return _ref.apply(this, arguments);
+      return function doFetchAll() {
+        return _ref4.apply(this, arguments);
       };
     }();
 
-    fetchLegendSet(engine);
-  }, [engine, props.visualization.legendSet]);
+    doFetchAll().catch(function (error) {
+      onError(error);
+    });
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [visualization, filters, forDashboard]);
 
-  if (hasLegendSet && !legendSet) {
-    // Until one of the children is rendered and calls onLoadingComplete,
-    // the app will continue to render the loading spinner
+  if (!fetchResult) {
     return null;
   }
 
-  if (!props.visualization.type || props.visualization.type === VIS_TYPE_PIVOT_TABLE) {
-    return React.createElement(PivotPlugin, _extends({}, props, {
-      legendSet: legendSet
-    }));
+  if (!fetchResult.visualization.type || fetchResult.visualization.type === VIS_TYPE_PIVOT_TABLE) {
+    return React.createElement(PivotPlugin, _extends({
+      visualization: fetchResult.visualization,
+      responses: fetchResult.responses,
+      legendSets: fetchResult.legendSets
+    }, props));
   } else {
-    return React.createElement(ChartPlugin, _extends({}, props, {
-      legendSet: legendSet
-    }));
+    return React.createElement(ChartPlugin, _extends({
+      visualization: fetchResult.visualization,
+      responses: fetchResult.responses,
+      extraOptions: fetchResult.extraOptions,
+      legendSets: fetchResult.legendSets
+    }, props));
   }
+};
+VisualizationPlugin.defaultProps = {
+  filters: {},
+  forDashboard: false,
+  onError: Function.prototype,
+  onLoadingComplete: Function.prototype,
+  onResponsesReceived: Function.prototype,
+  visualization: {}
+};
+VisualizationPlugin.propTypes = {
+  d2: PropTypes.object.isRequired,
+  visualization: PropTypes.object.isRequired,
+  filters: PropTypes.object,
+  forDashboard: PropTypes.bool,
+  onError: PropTypes.func,
+  onLoadingComplete: PropTypes.func,
+  onResponsesReceived: PropTypes.func
 };
 
 export default VisualizationPlugin;
