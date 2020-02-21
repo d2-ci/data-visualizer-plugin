@@ -198,7 +198,7 @@ var legendSetsQuery = {
     params: function params(_ref) {
       var ids = _ref.ids;
       return {
-        fields: 'legends[:all]',
+        fields: 'id,legends[id,displayName~rename(name),startValue,endValue,color]',
         filter: "id:in:[".concat(ids.join(','), "]")
       };
     }
@@ -760,6 +760,7 @@ function () {
 }();
 
 var LEGEND_DISPLAY_STRATEGY_BY_DATA_ITEM = 'BY_DATA_ITEM';
+var LEGEND_DISPLAY_STRATEGY_FIXED = 'FIXED';
 var VisualizationPlugin = function VisualizationPlugin(_ref) {
   var d2 = _ref.d2,
       visualization = _ref.visualization,
@@ -878,27 +879,37 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
                 responses = _ref5.responses;
                 extraOptions = _ref5.extraOptions;
                 legendSetIds = [];
+                _context3.t0 = visualization.legendDisplayStrategy;
+                _context3.next = _context3.t0 === LEGEND_DISPLAY_STRATEGY_FIXED ? 9 : _context3.t0 === LEGEND_DISPLAY_STRATEGY_BY_DATA_ITEM ? 11 : 14;
+                break;
 
-                if (visualization.legendDisplayStrategy === LEGEND_DISPLAY_STRATEGY_BY_DATA_ITEM) {
-                  // parse responses to extract legendSet ids from metaData
-                  // multiple responses are only for YOY which does not support legends
-                  // safe to use only the 1st
-                  dxIds = responses[0].metaData.dimensions.dx;
-                  dxIds.forEach(function (dxId) {
-                    var legendSetId = responses[0].metaData.items[dxId].legendSet;
-
-                    if (legendSetId) {
-                      legendSetIds.push(legendSetId);
-                    }
-                  });
-                } else if (visualization.legendSet && visualization.legendSet.id) {
+              case 9:
+                if (visualization.legendSet && visualization.legendSet.id) {
                   legendSetIds.push(visualization.legendSet.id);
                 }
 
-                _context3.next = 9;
+                return _context3.abrupt("break", 14);
+
+              case 11:
+                // parse responses to extract legendSet ids from metaData
+                // multiple responses are only for YOY which does not support legends
+                // safe to use only the 1st
+                // dx dimensions might not be present, the empty array covers that case
+                dxIds = responses[0].metaData.dimensions.dx || [];
+                dxIds.forEach(function (dxId) {
+                  var legendSetId = responses[0].metaData.items[dxId].legendSet;
+
+                  if (legendSetId) {
+                    legendSetIds.push(legendSetId);
+                  }
+                });
+                return _context3.abrupt("break", 14);
+
+              case 14:
+                _context3.next = 16;
                 return doFetchLegendSets(legendSetIds);
 
-              case 9:
+              case 16:
                 legendSets = _context3.sent;
                 setFetchResult({
                   visualization: visualization,
@@ -908,7 +919,7 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
                 });
                 onLoadingComplete();
 
-              case 12:
+              case 19:
               case "end":
                 return _context3.stop();
             }
