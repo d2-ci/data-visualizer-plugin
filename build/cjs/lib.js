@@ -213,6 +213,7 @@ var ChartPlugin = function ChartPlugin(_ref) {
   var visualization = _ref.visualization,
       responses = _ref.responses,
       extraOptions = _ref.extraOptions,
+      legendSets = _ref.legendSets,
       renderCounter = _ref.id,
       style = _ref.style,
       onChartGenerated = _ref.onChartGenerated,
@@ -220,7 +221,8 @@ var ChartPlugin = function ChartPlugin(_ref) {
   var canvasRef = React.useRef(undefined);
   var renderVisualization = React.useCallback(function (animation) {
     var visualizationConfig = analytics.createVisualization(responses, visualization, canvasRef.current, _objectSpread2({}, extraOptions, {
-      animation: animation
+      animation: animation,
+      legendSets: legendSets
     }), undefined, undefined, analytics.isSingleValue(visualization.type) ? 'dhis' : 'highcharts' // output format
     );
 
@@ -232,7 +234,7 @@ var ChartPlugin = function ChartPlugin(_ref) {
         sourceWidth: 1024
       }));
     }
-  }, [canvasRef, visualization, onChartGenerated, responses, extraOptions]);
+  }, [canvasRef, visualization, onChartGenerated, responses, extraOptions, legendSets]);
   React.useEffect(function () {
     renderVisualization(defaultAnimation);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -256,7 +258,7 @@ ChartPlugin.defaultProps = {
 };
 ChartPlugin.propTypes = {
   extraOptions: PropTypes.object.isRequired,
-  // legendSets: PropTypes.arrayOf(PropTypes.object).isRequired,
+  legendSets: PropTypes.arrayOf(PropTypes.object).isRequired,
   responses: PropTypes.arrayOf(PropTypes.object).isRequired,
   visualization: PropTypes.object.isRequired,
   animation: PropTypes.number,
