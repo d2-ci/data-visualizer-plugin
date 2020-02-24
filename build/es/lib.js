@@ -187,19 +187,22 @@ function _nonIterableRest() {
   throw new TypeError("Invalid attempt to destructure non-iterable instance");
 }
 
-var legendSetQuery = {
-  legendSet: {
+var legendSetsQuery = {
+  legendSets: {
     resource: 'legendSets',
-    id: function id(_ref) {
-      var _id = _ref.id;
-      return _id;
+    params: function params(_ref) {
+      var ids = _ref.ids;
+      return {
+        fields: 'id,legends[id,displayName~rename(name),startValue,endValue,color]',
+        filter: "id:in:[".concat(ids.join(','), "]")
+      };
     }
   }
 };
-var apiFetchLegendSet = function apiFetchLegendSet(dataEngine, id) {
-  return dataEngine.query(legendSetQuery, {
+var apiFetchLegendSets = function apiFetchLegendSets(dataEngine, ids) {
+  return dataEngine.query(legendSetsQuery, {
     variables: {
-      id: id
+      ids: ids
     }
   });
 };
@@ -753,6 +756,8 @@ function () {
   };
 }();
 
+var LEGEND_DISPLAY_STRATEGY_BY_DATA_ITEM = 'BY_DATA_ITEM';
+var LEGEND_DISPLAY_STRATEGY_FIXED = 'FIXED';
 var VisualizationPlugin = function VisualizationPlugin(_ref) {
   var d2 = _ref.d2,
       visualization = _ref.visualization,
@@ -806,42 +811,48 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
   })), [d2, filters, forDashboard, onResponsesReceived, visualization]);
   var doFetchLegendSets = useCallback(
   /*#__PURE__*/
-  _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee2() {
-    var response;
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            if (!(!visualization.legendSet || !visualization.legendSet.id)) {
-              _context2.next = 2;
-              break;
-            }
+  function () {
+    var _ref3 = _asyncToGenerator(
+    /*#__PURE__*/
+    regeneratorRuntime.mark(function _callee2(legendSetIds) {
+      var response;
+      return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              if (legendSetIds.length) {
+                _context2.next = 2;
+                break;
+              }
 
-            return _context2.abrupt("return", []);
+              return _context2.abrupt("return", []);
 
-          case 2:
-            _context2.next = 4;
-            return apiFetchLegendSet(engine, visualization.legendSet.id);
+            case 2:
+              _context2.next = 4;
+              return apiFetchLegendSets(engine, legendSetIds);
 
-          case 4:
-            response = _context2.sent;
+            case 4:
+              response = _context2.sent;
 
-            if (!(response && response.legendSet)) {
-              _context2.next = 7;
-              break;
-            }
+              if (!(response && response.legendSets)) {
+                _context2.next = 7;
+                break;
+              }
 
-            return _context2.abrupt("return", [response.legendSet]);
+              return _context2.abrupt("return", response.legendSets.legendSets);
 
-          case 7:
-          case "end":
-            return _context2.stop();
+            case 7:
+            case "end":
+              return _context2.stop();
+          }
         }
-      }
-    }, _callee2);
-  })), [engine, visualization.legendSet]);
+      }, _callee2);
+    }));
+
+    return function (_x) {
+      return _ref3.apply(this, arguments);
+    };
+  }(), [engine]);
   useEffect(function () {
     setFetchResult(null);
 
@@ -851,7 +862,7 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
       var _ref4 = _asyncToGenerator(
       /*#__PURE__*/
       regeneratorRuntime.mark(function _callee3() {
-        var _ref5, responses, extraOptions, legendSets;
+        var _ref5, responses, extraOptions, legendSetIds, dxIds, legendSets;
 
         return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
@@ -864,10 +875,38 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
                 _ref5 = _context3.sent;
                 responses = _ref5.responses;
                 extraOptions = _ref5.extraOptions;
-                _context3.next = 7;
-                return doFetchLegendSets();
+                legendSetIds = [];
+                _context3.t0 = visualization.legendDisplayStrategy;
+                _context3.next = _context3.t0 === LEGEND_DISPLAY_STRATEGY_FIXED ? 9 : _context3.t0 === LEGEND_DISPLAY_STRATEGY_BY_DATA_ITEM ? 11 : 14;
+                break;
 
-              case 7:
+              case 9:
+                if (visualization.legendSet && visualization.legendSet.id) {
+                  legendSetIds.push(visualization.legendSet.id);
+                }
+
+                return _context3.abrupt("break", 14);
+
+              case 11:
+                // parse responses to extract legendSet ids from metaData
+                // multiple responses are only for YOY which does not support legends
+                // safe to use only the 1st
+                // dx dimensions might not be present, the empty array covers that case
+                dxIds = responses[0].metaData.dimensions.dx || [];
+                dxIds.forEach(function (dxId) {
+                  var legendSetId = responses[0].metaData.items[dxId].legendSet;
+
+                  if (legendSetId) {
+                    legendSetIds.push(legendSetId);
+                  }
+                });
+                return _context3.abrupt("break", 14);
+
+              case 14:
+                _context3.next = 16;
+                return doFetchLegendSets(legendSetIds);
+
+              case 16:
                 legendSets = _context3.sent;
                 setFetchResult({
                   visualization: visualization,
@@ -877,7 +916,7 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
                 });
                 onLoadingComplete();
 
-              case 10:
+              case 19:
               case "end":
                 return _context3.stop();
             }
