@@ -274,16 +274,15 @@ var PivotPlugin = function PivotPlugin(_ref) {
   var responses = _ref.responses,
       legendSets = _ref.legendSets,
       visualization = _ref.visualization,
-      style = _ref.style;
+      style = _ref.style,
+      renderCounter = _ref.id;
   return React__default.createElement("div", {
-    style: _objectSpread2({
-      width: '100%',
-      height: '100%'
-    }, style)
+    style: style
   }, React__default.createElement(analytics.PivotTable, {
     visualization: visualization,
     data: responses[0].response,
-    legendSets: legendSets
+    legendSets: legendSets,
+    renderCounter: renderCounter
   }));
 };
 
@@ -294,6 +293,7 @@ PivotPlugin.propTypes = {
   legendSets: PropTypes.arrayOf(PropTypes.object).isRequired,
   responses: PropTypes.arrayOf(PropTypes.object).isRequired,
   visualization: PropTypes.object.isRequired,
+  id: PropTypes.number,
   style: PropTypes.object
 };
 
