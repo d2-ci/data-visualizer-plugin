@@ -524,7 +524,7 @@ var options = {
     requestable: false,
     savable: true
   },
-  // only for PT XXX
+  // only for PT
   colTotals: {
     defaultValue: false,
     requestable: false,
@@ -552,12 +552,12 @@ var options = {
   },
   hideEmptyColumns: {
     defaultValue: false,
-    requestable: true,
+    requestable: false,
     savable: true
   },
   hideEmptyRows: {
     defaultValue: false,
-    requestable: true,
+    requestable: false,
     savable: true
   },
   skipRounding: {
@@ -581,7 +581,7 @@ var options = {
     savable: true
   },
   legendDisplayStrategy: {
-    defaultValue: undefined,
+    defaultValue: 'FIXED',
     requestable: false,
     savable: true
   },
