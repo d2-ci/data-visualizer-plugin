@@ -309,7 +309,7 @@ function () {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            req = new d2.analytics.request().fromModel(current).withParameters(options);
+            req = new d2.analytics.request().fromModel(current).withParameters(options).withIncludeNumDen(true);
             _context.next = 3;
             return d2.analytics.aggregate.get(req);
 
