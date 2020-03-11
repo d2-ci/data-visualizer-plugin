@@ -1,6 +1,6 @@
 /* eslint-disable */
 import React, { useRef, useCallback, useEffect, useState } from 'react';
-import { createVisualization, isSingleValue, PivotTable, isYearOverYear, VIS_TYPE_PIVOT_TABLE } from '@dhis2/analytics';
+import { createVisualization, isSingleValue, PivotTable, VIS_TYPE_PIVOT_TABLE, isYearOverYear } from '@dhis2/analytics';
 import { useDataEngine } from '@dhis2/app-runtime';
 import PropTypes from 'prop-types';
 import i18n from '@dhis2/d2-i18n';
@@ -304,7 +304,7 @@ function () {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            req = new d2.analytics.request().fromModel(current).withParameters(options).withIncludeNumDen(true);
+            req = new d2.analytics.request().fromModel(current).withParameters(options).withIncludeNumDen(current.type === VIS_TYPE_PIVOT_TABLE);
             _context.next = 3;
             return d2.analytics.aggregate.get(req);
 
