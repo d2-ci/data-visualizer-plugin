@@ -154,8 +154,7 @@ var _initialiseProps = function _initialiseProps() {
                         visualization = _context.t0;
                         options = _this2.getRequestOptions(visualization, filters);
                         extraOptions = {
-                            dashboard: forDashboard,
-                            noData: { text: i18n.t('No data') }
+                            dashboard: forDashboard
                         };
                         responses = [];
 
