@@ -1,11 +1,11 @@
 /* eslint-disable */
-import React, { useRef, useCallback, useEffect, useState } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
-import i18n from '@dhis2/d2-i18n';
 import { useDataEngine } from '@dhis2/app-runtime';
-import { Popper, Menu, MenuItem, Divider } from '@dhis2/ui-core';
-import { createVisualization, isSingleValue, PivotTable, VIS_TYPE_PIVOT_TABLE, isYearOverYear, layoutReplaceDimension, DIMENSION_ID_ORGUNIT } from '@dhis2/analytics';
+import { Menu, MenuItem, Divider, Popper } from '@dhis2/ui-core';
+import { createVisualization, isSingleValue, PivotTable, VIS_TYPE_PIVOT_TABLE, isYearOverYear } from '@dhis2/analytics';
+import i18n from '@dhis2/d2-i18n';
 import 'lodash-es/pick';
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
@@ -209,6 +209,15 @@ var apiFetchLegendSets = function apiFetchLegendSets(dataEngine, ids) {
   });
 };
 
+var orgUnitLevelsQuery = {
+  orgUnitsLevels: {
+    resource: 'organisationUnitLevels',
+    params: {
+      fields: 'id,level,displayName~rename(name)',
+      paging: 'false'
+    }
+  }
+};
 var orgUnitsQuery = {
   orgUnits: {
     resource: 'organisationUnits',
@@ -217,16 +226,159 @@ var orgUnitsQuery = {
       return _id;
     },
     params: {
-      fields: 'id,level,displayName~rename(name),parent[id,displayName~rename(name)],children[level]'
+      fields: 'id,level,displayName~rename(name),parent[id,displayName~rename(name)],children[level]',
+      paging: 'false',
+      userDataViewFallback: 'true'
     }
   }
 };
-var apiFetchOuData = function apiFetchOuData(dataEngine, id) {
+var apiFetchOrganisationUnitLevels = function apiFetchOrganisationUnitLevels(dataEngine) {
+  return dataEngine.query(orgUnitLevelsQuery);
+};
+var apiFetchOrganisationUnit = function apiFetchOrganisationUnit(dataEngine, id) {
   return dataEngine.query(orgUnitsQuery, {
     variables: {
       id: id
     }
   });
+};
+
+var ContextualMenu = function ContextualMenu(_ref) {
+  var config = _ref.config,
+      ouLevels = _ref.ouLevels,
+      _onClick = _ref.onClick;
+  var engine = useDataEngine();
+
+  var _useState = useState(undefined),
+      _useState2 = _slicedToArray(_useState, 2),
+      ouData = _useState2[0],
+      setOuData = _useState2[1];
+
+  var _useState3 = useState(undefined),
+      _useState4 = _slicedToArray(_useState3, 2),
+      subLevelData = _useState4[0],
+      setSubLevelData = _useState4[1];
+
+  var lookupLevel = function lookupLevel(levelId) {
+    return ouLevels.find(function (item) {
+      return item.level === levelId;
+    });
+  };
+
+  var doFetchOuData = useCallback(
+  /*#__PURE__*/
+  function () {
+    var _ref2 = _asyncToGenerator(
+    /*#__PURE__*/
+    regeneratorRuntime.mark(function _callee(ouId) {
+      var ouData;
+      return regeneratorRuntime.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _context.next = 2;
+              return apiFetchOrganisationUnit(engine, ouId);
+
+            case 2:
+              ouData = _context.sent;
+              return _context.abrupt("return", ouData.orgUnits);
+
+            case 4:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee);
+    }));
+
+    return function (_x) {
+      return _ref2.apply(this, arguments);
+    };
+  }(), [engine]);
+  useEffect(function () {
+    setOuData(null);
+
+    var doFetch =
+    /*#__PURE__*/
+    function () {
+      var _ref3 = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2() {
+        var orgUnit;
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.next = 2;
+                return doFetchOuData(config.ouId);
+
+              case 2:
+                orgUnit = _context2.sent;
+                setOuData(orgUnit);
+
+              case 4:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2);
+      }));
+
+      return function doFetch() {
+        return _ref3.apply(this, arguments);
+      };
+    }();
+
+    doFetch();
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [config]);
+  useEffect(function () {
+    setSubLevelData(null);
+
+    if (ouData === null || ouData === void 0 ? void 0 : ouData.children.length) {
+      var levelData = lookupLevel(ouData.children[0].level);
+
+      if (levelData) {
+        setSubLevelData(levelData);
+      }
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+
+  }, [ouData]);
+  return React.createElement(Menu, null, ouData && React.createElement(MenuItem, {
+    label: i18n.t('Org. unit drill down/up')
+  }, React.createElement(Menu, null, subLevelData && React.createElement(React.Fragment, null, React.createElement(MenuItem, {
+    dense: true,
+    label: i18n.t('Show {{level}} level in {{orgunit}}', {
+      level: subLevelData.name,
+      orgunit: ouData.name
+    }),
+    onClick: function onClick() {
+      return _onClick({
+        ou: {
+          id: ouData.id,
+          level: subLevelData.id
+        }
+      });
+    }
+  }), (ouData === null || ouData === void 0 ? void 0 : ouData.parent) && React.createElement(Divider, null)), (ouData === null || ouData === void 0 ? void 0 : ouData.parent) && React.createElement(MenuItem, {
+    dense: true,
+    label: i18n.t('Show {{orgunit}}', {
+      orgunit: ouData.parent.name
+    }),
+    onClick: function onClick() {
+      return _onClick({
+        ou: {
+          id: ouData.parent.id
+        }
+      });
+    }
+  }))));
+};
+ContextualMenu.propTypes = {
+  config: PropTypes.object,
+  ouLevels: PropTypes.array,
+  onClick: PropTypes.func
 };
 
 var ChartPlugin = function ChartPlugin(_ref) {
@@ -794,147 +946,40 @@ var styles = {
 
 var LEGEND_DISPLAY_STRATEGY_BY_DATA_ITEM = 'BY_DATA_ITEM';
 var LEGEND_DISPLAY_STRATEGY_FIXED = 'FIXED';
+var VisualizationPlugin = function VisualizationPlugin(_ref) {
+  var d2 = _ref.d2,
+      visualization = _ref.visualization,
+      filters = _ref.filters,
+      forDashboard = _ref.forDashboard,
+      onError = _ref.onError,
+      onLoadingComplete = _ref.onLoadingComplete,
+      onResponsesReceived = _ref.onResponsesReceived,
+      onDrill = _ref.onDrill,
+      props = _objectWithoutProperties(_ref, ["d2", "visualization", "filters", "forDashboard", "onError", "onLoadingComplete", "onResponsesReceived", "onDrill"]);
 
-var ContextualMenu = function ContextualMenu(_ref) {
-  var config = _ref.config,
-      _onClick = _ref.onClick;
   var engine = useDataEngine();
 
-  var _useState = useState(undefined),
+  var _useState = useState(null),
       _useState2 = _slicedToArray(_useState, 2),
-      ouData = _useState2[0],
-      setOuData = _useState2[1];
+      fetchResult = _useState2[0],
+      setFetchResult = _useState2[1];
 
-  var doFetchOuData = useCallback(
-  /*#__PURE__*/
-  function () {
-    var _ref2 = _asyncToGenerator(
-    /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee(ouId) {
-      var ouData;
-      return regeneratorRuntime.wrap(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              _context.next = 2;
-              return apiFetchOuData(engine, ouId);
-
-            case 2:
-              ouData = _context.sent;
-              return _context.abrupt("return", ouData);
-
-            case 4:
-            case "end":
-              return _context.stop();
-          }
-        }
-      }, _callee);
-    }));
-
-    return function (_x) {
-      return _ref2.apply(this, arguments);
-    };
-  }(), [engine]);
-  useEffect(function () {
-    setOuData(null);
-
-    var doFetch =
-    /*#__PURE__*/
-    function () {
-      var _ref3 = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee2() {
-        var ouData;
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
-          while (1) {
-            switch (_context2.prev = _context2.next) {
-              case 0:
-                _context2.next = 2;
-                return doFetchOuData(config.ouId);
-
-              case 2:
-                ouData = _context2.sent;
-                setOuData(ouData.orgUnits);
-
-              case 4:
-              case "end":
-                return _context2.stop();
-            }
-          }
-        }, _callee2);
-      }));
-
-      return function doFetch() {
-        return _ref3.apply(this, arguments);
-      };
-    }();
-
-    doFetch();
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [config]);
-  return React.createElement(Menu, null, ouData && React.createElement(MenuItem, {
-    label: i18n.t('Org. unit drill down/up')
-  }, React.createElement(Menu, null, Boolean(ouData === null || ouData === void 0 ? void 0 : ouData.children.length) && React.createElement(React.Fragment, null, React.createElement(MenuItem, {
-    dense: true,
-    label: "Show level ".concat(ouData.children[0].level, " in ").concat(ouData.name),
-    onClick: function onClick() {
-      return _onClick({
-        ou: {
-          id: ouData.id,
-          level: ouData.children[0].level
-        }
-      });
-    }
-  }), (ouData === null || ouData === void 0 ? void 0 : ouData.parent) && React.createElement(Divider, null)), (ouData === null || ouData === void 0 ? void 0 : ouData.parent) && React.createElement(MenuItem, {
-    dense: true,
-    label: i18n.t('Show {{orgunit}}', {
-      orgunit: ouData.parent.name
-    }),
-    onClick: function onClick() {
-      return _onClick({
-        ou: {
-          id: ouData.parent.id
-        }
-      });
-    }
-  }))));
-};
-
-var VisualizationPlugin = function VisualizationPlugin(_ref4) {
-  var d2 = _ref4.d2,
-      visualization = _ref4.visualization,
-      filters = _ref4.filters,
-      forDashboard = _ref4.forDashboard,
-      onError = _ref4.onError,
-      onLoadingComplete = _ref4.onLoadingComplete,
-      onResponsesReceived = _ref4.onResponsesReceived,
-      onDrill = _ref4.onDrill,
-      props = _objectWithoutProperties(_ref4, ["d2", "visualization", "filters", "forDashboard", "onError", "onLoadingComplete", "onResponsesReceived", "onDrill"]);
-
-  var engine = useDataEngine();
-
-  var _useState3 = useState(null),
+  var _useState3 = useState(undefined),
       _useState4 = _slicedToArray(_useState3, 2),
-      fetchResult = _useState4[0],
-      setFetchResult = _useState4[1];
+      contextualMenuRef = _useState4[0],
+      setContextualMenuRef = _useState4[1];
 
-  var _useState5 = useState(undefined),
+  var _useState5 = useState({}),
       _useState6 = _slicedToArray(_useState5, 2),
-      contextualMenuRef = _useState6[0],
-      setContextualMenuRef = _useState6[1];
+      contextualMenuConfig = _useState6[0],
+      setContextualMenuConfig = _useState6[1];
 
-  var _useState7 = useState({}),
+  var _useState7 = useState(null),
       _useState8 = _slicedToArray(_useState7, 2),
-      contextualMenuConfig = _useState8[0],
-      setContextualMenuConfig = _useState8[1];
-
-  var _useState9 = useState(visualization),
-      _useState10 = _slicedToArray(_useState9, 2),
-      vis = _useState10[0],
-      setVis = _useState10[1];
+      ouLevels = _useState8[0],
+      setOuLevels = _useState8[1];
 
   var onToggleContextualMenu = function onToggleContextualMenu(ref, data) {
-    console.log('context menu args', ref, data);
     setContextualMenuRef(ref);
     setContextualMenuConfig(data);
   };
@@ -945,147 +990,197 @@ var VisualizationPlugin = function VisualizationPlugin(_ref4) {
 
   var onContextualMenuItemClick = function onContextualMenuItemClick(args) {
     closeContextualMenu();
-    onDrill = undefined;
+    console.log('contex click', args);
 
-    if (!onDrill) {
-      if (args.ou) {
-        console.log('replace ou dimension', args.ou);
-        var ouItems = [{
-          id: args.ou.id
-        }];
+    if (args.ou) {
+      var ouItems = [{
+        id: args.ou.id,
+        name: args.ou.name
+      }];
 
-        if (args.ou.level) {
-          ouItems.push({
-            id: args.ou.level
-          });
-        }
-
-        setVis(layoutReplaceDimension(visualization, DIMENSION_ID_ORGUNIT, ouItems)); // TODO
-        // if (args.pe) {
+      if (args.ou.level) {
+        var levelData = ouLevels.find(function (item) {
+          return item.id === args.ou.level;
+        });
+        ouItems.push({
+          id: levelData.id,
+          name: levelData.name
+        });
       }
-    } else {
-      onDrill(args);
     }
+
+    onDrill(args);
   };
 
   var doFetchData = useCallback(
   /*#__PURE__*/
   _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee3() {
+  regeneratorRuntime.mark(function _callee() {
     var result;
-    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+    return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
-        switch (_context3.prev = _context3.next) {
+        switch (_context.prev = _context.next) {
           case 0:
-            _context3.next = 2;
+            _context.next = 2;
             return fetchData({
-              visualization: vis,
-              //visualization,
+              visualization: visualization,
               filters: filters,
               d2: d2,
               forDashboard: forDashboard
             });
 
           case 2:
-            result = _context3.sent;
+            result = _context.sent;
 
             if (result.responses.length) {
               onResponsesReceived(result.responses);
             }
 
-            return _context3.abrupt("return", result);
+            return _context.abrupt("return", result);
 
           case 5:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  })), [d2, filters, forDashboard, onResponsesReceived, visualization]);
+  var doFetchLegendSets = useCallback(
+  /*#__PURE__*/
+  function () {
+    var _ref3 = _asyncToGenerator(
+    /*#__PURE__*/
+    regeneratorRuntime.mark(function _callee2(legendSetIds) {
+      var response;
+      return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              if (legendSetIds.length) {
+                _context2.next = 2;
+                break;
+              }
+
+              return _context2.abrupt("return", []);
+
+            case 2:
+              _context2.next = 4;
+              return apiFetchLegendSets(engine, legendSetIds);
+
+            case 4:
+              response = _context2.sent;
+
+              if (!(response && response.legendSets)) {
+                _context2.next = 7;
+                break;
+              }
+
+              return _context2.abrupt("return", response.legendSets.legendSets);
+
+            case 7:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      }, _callee2);
+    }));
+
+    return function (_x) {
+      return _ref3.apply(this, arguments);
+    };
+  }(), [engine]);
+  var doFetchOuLevelsData = useCallback(
+  /*#__PURE__*/
+  _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee3() {
+    var ouLevelsData;
+    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            _context3.next = 2;
+            return apiFetchOrganisationUnitLevels(engine);
+
+          case 2:
+            ouLevelsData = _context3.sent;
+            return _context3.abrupt("return", ouLevelsData.orgUnitsLevels.organisationUnitLevels);
+
+          case 4:
           case "end":
             return _context3.stop();
         }
       }
     }, _callee3);
-  })), [d2, filters, forDashboard, onResponsesReceived, vis]); //visualization])
-
-  var doFetchLegendSets = useCallback(
-  /*#__PURE__*/
-  function () {
-    var _ref6 = _asyncToGenerator(
-    /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee4(legendSetIds) {
-      var response;
-      return regeneratorRuntime.wrap(function _callee4$(_context4) {
-        while (1) {
-          switch (_context4.prev = _context4.next) {
-            case 0:
-              if (legendSetIds.length) {
-                _context4.next = 2;
-                break;
-              }
-
-              return _context4.abrupt("return", []);
-
-            case 2:
-              _context4.next = 4;
-              return apiFetchLegendSets(engine, legendSetIds);
-
-            case 4:
-              response = _context4.sent;
-
-              if (!(response && response.legendSets)) {
-                _context4.next = 7;
-                break;
-              }
-
-              return _context4.abrupt("return", response.legendSets.legendSets);
-
-            case 7:
-            case "end":
-              return _context4.stop();
-          }
-        }
-      }, _callee4);
-    }));
-
-    return function (_x2) {
-      return _ref6.apply(this, arguments);
-    };
-  }(), [engine]);
+  })), [engine]);
   useEffect(function () {
-    setVis(visualization);
-  }, [visualization]);
+    var doFetch =
+    /*#__PURE__*/
+    function () {
+      var _ref5 = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee4() {
+        var orgUnitLevels;
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                _context4.next = 2;
+                return doFetchOuLevelsData();
+
+              case 2:
+                orgUnitLevels = _context4.sent;
+                setOuLevels(orgUnitLevels);
+
+              case 4:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4);
+      }));
+
+      return function doFetch() {
+        return _ref5.apply(this, arguments);
+      };
+    }();
+
+    doFetch().catch(function (error) {
+      return onError(error);
+    });
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, []);
   useEffect(function () {
     setFetchResult(null);
-    console.log('in effect');
 
     var doFetchAll =
     /*#__PURE__*/
     function () {
-      var _ref7 = _asyncToGenerator(
+      var _ref6 = _asyncToGenerator(
       /*#__PURE__*/
       regeneratorRuntime.mark(function _callee5() {
-        var _ref8, responses, extraOptions, legendSetIds, dxIds, legendSets;
+        var _ref7, responses, extraOptions, legendSetIds, dxIds, legendSets;
 
         return regeneratorRuntime.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
               case 0:
                 _context5.next = 2;
-                return doFetchData(vis, //ualization,
-                filters, forDashboard);
+                return doFetchData(visualization, filters, forDashboard);
 
               case 2:
-                _ref8 = _context5.sent;
-                responses = _ref8.responses;
-                extraOptions = _ref8.extraOptions;
-                legendSetIds = []; //switch (visualization.legendDisplayStrategy) {
-
-                _context5.t0 = vis.legendDisplayStrategy;
+                _ref7 = _context5.sent;
+                responses = _ref7.responses;
+                extraOptions = _ref7.extraOptions;
+                legendSetIds = [];
+                _context5.t0 = visualization.legendDisplayStrategy;
                 _context5.next = _context5.t0 === LEGEND_DISPLAY_STRATEGY_FIXED ? 9 : _context5.t0 === LEGEND_DISPLAY_STRATEGY_BY_DATA_ITEM ? 11 : 14;
                 break;
 
               case 9:
-                //if (visualization.legendSet && visualization.legendSet.id) {
-                if (vis.legendSet && vis.legendSet.id) {
-                  //legendSetIds.push(visualization.legendSet.id)
-                  legendSetIds.push(vis.legendSet.id);
+                if (visualization.legendSet && visualization.legendSet.id) {
+                  legendSetIds.push(visualization.legendSet.id);
                 }
 
                 return _context5.abrupt("break", 14);
@@ -1112,7 +1207,7 @@ var VisualizationPlugin = function VisualizationPlugin(_ref4) {
               case 16:
                 legendSets = _context5.sent;
                 setFetchResult({
-                  visualization: vis,
+                  visualization: visualization,
                   legendSets: legendSets,
                   responses: responses,
                   extraOptions: extraOptions
@@ -1128,7 +1223,7 @@ var VisualizationPlugin = function VisualizationPlugin(_ref4) {
       }));
 
       return function doFetchAll() {
-        return _ref7.apply(this, arguments);
+        return _ref6.apply(this, arguments);
       };
     }();
 
@@ -1136,7 +1231,7 @@ var VisualizationPlugin = function VisualizationPlugin(_ref4) {
       onError(error);
     });
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [vis, filters, forDashboard]);
+  }, [visualization, filters, forDashboard]);
 
   if (!fetchResult) {
     return null;
@@ -1160,6 +1255,7 @@ var VisualizationPlugin = function VisualizationPlugin(_ref4) {
     placement: "right"
   }, React.createElement(ContextualMenu, {
     config: contextualMenuConfig,
+    ouLevels: ouLevels,
     onClick: onContextualMenuItemClick
   }))), document.body));
 };

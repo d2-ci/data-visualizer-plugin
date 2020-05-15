@@ -2,13 +2,13 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import PropTypes from 'prop-types'
 
-import i18n from '@dhis2/d2-i18n'
 import { useDataEngine } from '@dhis2/app-runtime'
-import { Divider, Menu, MenuItem, Popper } from '@dhis2/ui-core'
-import { VIS_TYPE_PIVOT_TABLE, DIMENSION_ID_ORGUNIT, layoutReplaceDimension } from '@dhis2/analytics'
+import { Popper } from '@dhis2/ui-core'
+import { VIS_TYPE_PIVOT_TABLE } from '@dhis2/analytics'
 
 import { apiFetchLegendSets } from './api/legendSets'
-import { apiFetchOuData } from './api/organisationUnits'
+import { apiFetchOrganisationUnitLevels } from './api/organisationUnits'
+import ContextualMenu from './ContextualMenu'
 import ChartPlugin from './ChartPlugin'
 import PivotPlugin from './PivotPlugin'
 import { fetchData } from './modules/fetchData'
@@ -17,56 +17,6 @@ import styles from './styles/VisualizationPlugin.style.js'
 
 const LEGEND_DISPLAY_STRATEGY_BY_DATA_ITEM = 'BY_DATA_ITEM'
 const LEGEND_DISPLAY_STRATEGY_FIXED = 'FIXED'
-
-const ContextualMenu = ({ config, onClick }) => {
-    const engine = useDataEngine()
-    const [ouData, setOuData] = useState(undefined)
-
-    const doFetchOuData = useCallback(
-        async ouId => {
-            const ouData = await apiFetchOuData(engine, ouId)
-
-            return ouData
-        },
-        [engine]
-    )
-
-    useEffect(() => {
-        setOuData(null)
-
-        const doFetch = async () => {
-            const ouData = await doFetchOuData(config.ouId)
-
-            setOuData(ouData.orgUnits)
-        }
-
-        doFetch()
-
-        /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    }, [config])
-
-    return (
-        <Menu>
-            {ouData &&
-                <MenuItem label={i18n.t('Org. unit drill down/up')}>
-                    <Menu>
-                        {
-                            Boolean(ouData?.children.length) && (
-                                <>
-                                    <MenuItem dense label={`Show level ${ouData.children[0].level} in ${ouData.name}`} onClick={() => onClick({ ou: { id: ouData.id, level: ouData.children[0].level } })}/>
-                                    {ouData?.parent && <Divider />}
-                                </>
-                            )
-                        }
-                        {ouData?.parent &&
-                                <MenuItem dense label={i18n.t('Show {{orgunit}}', { orgunit: ouData.parent.name })} onClick={() => onClick({ ou: { id: ouData.parent.id } })} />
-                        }
-                    </Menu>
-                </MenuItem>
-            }
-        </Menu>
-    )
-}
 
 export const VisualizationPlugin = ({
     d2,
@@ -83,11 +33,9 @@ export const VisualizationPlugin = ({
     const [fetchResult, setFetchResult] = useState(null)
     const [contextualMenuRef, setContextualMenuRef] = useState(undefined)
     const [contextualMenuConfig, setContextualMenuConfig] = useState({})
-    const [vis, setVis] = useState(visualization)
+    const [ouLevels, setOuLevels] = useState(null)
 
     const onToggleContextualMenu = (ref, data) => {
-        console.log('context menu args', ref, data)
-
         setContextualMenuRef(ref)
         setContextualMenuConfig(data)
     }
@@ -96,33 +44,28 @@ export const VisualizationPlugin = ({
 
     const onContextualMenuItemClick = args => {
         closeContextualMenu()
-onDrill = undefined
-        if (!onDrill) {
-            if (args.ou) {
-                console.log('replace ou dimension', args.ou)
-                const ouItems = [
-                    {id: args.ou.id }
-                ]
+        console.log('contex click', args)
+        if (args.ou) {
+            const ouItems = [{ id: args.ou.id, name: args.ou.name }]
 
-                if (args.ou.level) {
-                    ouItems.push({
-                        id: args.ou.level
-                    })
-                }
+            if (args.ou.level) {
+                const levelData = ouLevels.find(
+                    item => item.id === args.ou.level
+                )
 
-                setVis(layoutReplaceDimension(visualization, DIMENSION_ID_ORGUNIT, ouItems))
-
-                // TODO
-                // if (args.pe) {
+                ouItems.push({
+                    id: levelData.id,
+                    name: levelData.name,
+                })
             }
-        } else {
-            onDrill(args)
         }
+
+        onDrill(args)
     }
 
     const doFetchData = useCallback(async () => {
         const result = await fetchData({
-            visualization: vis,//visualization,
+            visualization,
             filters,
             d2,
             forDashboard,
@@ -133,7 +76,7 @@ onDrill = undefined
         }
 
         return result
-    }, [d2, filters, forDashboard, onResponsesReceived, vis])//visualization])
+    }, [d2, filters, forDashboard, onResponsesReceived, visualization])
 
     const doFetchLegendSets = useCallback(
         async legendSetIds => {
@@ -150,29 +93,39 @@ onDrill = undefined
         [engine]
     )
 
+    const doFetchOuLevelsData = useCallback(async () => {
+        const ouLevelsData = await apiFetchOrganisationUnitLevels(engine)
+
+        return ouLevelsData.orgUnitsLevels.organisationUnitLevels
+    }, [engine])
+
     useEffect(() => {
-        setVis(visualization)
-    }, [visualization])
+        const doFetch = async () => {
+            const orgUnitLevels = await doFetchOuLevelsData()
+
+            setOuLevels(orgUnitLevels)
+        }
+
+        doFetch().catch(error => onError(error))
+        /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    }, [])
 
     useEffect(() => {
         setFetchResult(null)
-        console.log('in effect')
+
         const doFetchAll = async () => {
             const { responses, extraOptions } = await doFetchData(
-                vis, //ualization,
+                visualization,
                 filters,
                 forDashboard
             )
 
             const legendSetIds = []
 
-            //switch (visualization.legendDisplayStrategy) {
-            switch (vis.legendDisplayStrategy) {
+            switch (visualization.legendDisplayStrategy) {
                 case LEGEND_DISPLAY_STRATEGY_FIXED:
-                    //if (visualization.legendSet && visualization.legendSet.id) {
-                    if (vis.legendSet && vis.legendSet.id) {
-                        //legendSetIds.push(visualization.legendSet.id)
-                        legendSetIds.push(vis.legendSet.id)
+                    if (visualization.legendSet && visualization.legendSet.id) {
+                        legendSetIds.push(visualization.legendSet.id)
                     }
                     break
                 case LEGEND_DISPLAY_STRATEGY_BY_DATA_ITEM: {
@@ -198,7 +151,7 @@ onDrill = undefined
             const legendSets = await doFetchLegendSets(legendSetIds)
 
             setFetchResult({
-                visualization: vis,
+                visualization,
                 legendSets,
                 responses,
                 extraOptions,
@@ -211,7 +164,7 @@ onDrill = undefined
         })
 
         /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    }, [vis, filters, forDashboard])
+    }, [visualization, filters, forDashboard])
 
     if (!fetchResult) {
         return null
@@ -219,33 +172,37 @@ onDrill = undefined
 
     return (
         <>
-        {(!fetchResult.visualization.type ||
-        fetchResult.visualization.type === VIS_TYPE_PIVOT_TABLE) ?
-            <PivotPlugin
-                visualization={fetchResult.visualization}
-                responses={fetchResult.responses}
-                legendSets={fetchResult.legendSets}
-                onToggleContextualMenu={onToggleContextualMenu}
-                {...props}
-            />
-            :
-            <ChartPlugin
-                visualization={fetchResult.visualization}
-                responses={fetchResult.responses}
-                extraOptions={fetchResult.extraOptions}
-                legendSets={fetchResult.legendSets}
-                {...props}
-            />
-        }
-        {contextualMenuRef &&
-            createPortal(
-                <div onClick={closeContextualMenu} style={styles.backdrop}>
-                    <Popper reference={contextualMenuRef} placement="right">
-                        <ContextualMenu config={contextualMenuConfig} onClick={onContextualMenuItemClick} />
-                    </Popper>
-                </div>,
-                document.body
+            {!fetchResult.visualization.type ||
+            fetchResult.visualization.type === VIS_TYPE_PIVOT_TABLE ? (
+                <PivotPlugin
+                    visualization={fetchResult.visualization}
+                    responses={fetchResult.responses}
+                    legendSets={fetchResult.legendSets}
+                    onToggleContextualMenu={onToggleContextualMenu}
+                    {...props}
+                />
+            ) : (
+                <ChartPlugin
+                    visualization={fetchResult.visualization}
+                    responses={fetchResult.responses}
+                    extraOptions={fetchResult.extraOptions}
+                    legendSets={fetchResult.legendSets}
+                    {...props}
+                />
             )}
+            {contextualMenuRef &&
+                createPortal(
+                    <div onClick={closeContextualMenu} style={styles.backdrop}>
+                        <Popper reference={contextualMenuRef} placement="right">
+                            <ContextualMenu
+                                config={contextualMenuConfig}
+                                ouLevels={ouLevels}
+                                onClick={onContextualMenuItemClick}
+                            />
+                        </Popper>
+                    </div>,
+                    document.body
+                )}
         </>
     )
 }
