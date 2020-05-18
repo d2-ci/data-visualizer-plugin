@@ -243,6 +243,52 @@ var apiFetchOrganisationUnit = function apiFetchOrganisationUnit(dataEngine, id)
   });
 };
 
+var ArrowUpwardIcon = function ArrowUpwardIcon(_ref) {
+  var _ref$style = _ref.style,
+      style = _ref$style === void 0 ? {
+    width: 18,
+    height: 18
+  } : _ref$style;
+  return React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    style: style
+  }, React.createElement("path", {
+    d: "M0 0h24v24H0V0z",
+    fill: "none"
+  }), React.createElement("path", {
+    d: "M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z",
+    fill: "black"
+  }));
+};
+
+ArrowUpwardIcon.propTypes = {
+  style: PropTypes.object
+};
+
+var ArrowDownwardIcon = function ArrowDownwardIcon(_ref) {
+  var _ref$style = _ref.style,
+      style = _ref$style === void 0 ? {
+    width: 18,
+    height: 18
+  } : _ref$style;
+  return React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    style: style
+  }, React.createElement("path", {
+    d: "M0 0h24v24H0V0z",
+    fill: "none"
+  }), React.createElement("path", {
+    d: "M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z",
+    fill: "black"
+  }));
+};
+
+ArrowDownwardIcon.propTypes = {
+  style: PropTypes.object
+};
+
 var ContextualMenu = function ContextualMenu(_ref) {
   var config = _ref.config,
       ouLevels = _ref.ouLevels,
@@ -349,6 +395,7 @@ var ContextualMenu = function ContextualMenu(_ref) {
     label: i18n.t('Org. unit drill down/up')
   }, React.createElement(Menu, null, subLevelData && React.createElement(React.Fragment, null, React.createElement(MenuItem, {
     dense: true,
+    icon: React.createElement(ArrowDownwardIcon, null),
     label: i18n.t('Show {{level}} level in {{orgunit}}', {
       level: subLevelData.name,
       orgunit: ouData.name
@@ -363,6 +410,7 @@ var ContextualMenu = function ContextualMenu(_ref) {
     }
   }), (ouData === null || ouData === void 0 ? void 0 : ouData.parent) && React.createElement(Divider, null)), (ouData === null || ouData === void 0 ? void 0 : ouData.parent) && React.createElement(MenuItem, {
     dense: true,
+    icon: React.createElement(ArrowUpwardIcon, null),
     label: i18n.t('Show {{orgunit}}', {
       orgunit: ouData.parent.name
     }),
