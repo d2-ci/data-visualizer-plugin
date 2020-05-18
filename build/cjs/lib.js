@@ -380,8 +380,11 @@ var ContextualMenu = function ContextualMenu(_ref) {
       };
     }();
 
-    doFetch();
+    if (config.ouId) {
+      doFetch();
+    }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
+
   }, [config]);
   React.useEffect(function () {
     setSubLevelData(null);
@@ -397,6 +400,7 @@ var ContextualMenu = function ContextualMenu(_ref) {
 
   }, [ouData]);
   return React__default.createElement(uiCore.Menu, null, ouData && React__default.createElement(uiCore.MenuItem, {
+    dense: true,
     label: i18n.t('Org. unit drill down/up')
   }, React__default.createElement(uiCore.Menu, null, subLevelData && React__default.createElement(React__default.Fragment, null, React__default.createElement(uiCore.MenuItem, {
     dense: true,
