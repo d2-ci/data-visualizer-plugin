@@ -990,7 +990,6 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
 
   var onContextualMenuItemClick = function onContextualMenuItemClick(args) {
     closeContextualMenu();
-    console.log('contex click', args);
 
     if (args.ou) {
       var ouItems = [{
