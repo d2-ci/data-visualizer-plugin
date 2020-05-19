@@ -1288,6 +1288,12 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
     return null;
   }
 
+  var contextualMenuRect = contextualMenuRef && contextualMenuRef.current && contextualMenuRef.current.getBoundingClientRect();
+  var virtualContextualMenuElement = contextualMenuRect ? {
+    getBoundingClientRect: function getBoundingClientRect() {
+      return contextualMenuRect;
+    }
+  } : null;
   return React.createElement(React.Fragment, null, !fetchResult.visualization.type || fetchResult.visualization.type === VIS_TYPE_PIVOT_TABLE ? React.createElement(PivotPlugin, _extends({
     visualization: fetchResult.visualization,
     responses: fetchResult.responses,
@@ -1298,11 +1304,11 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
     responses: fetchResult.responses,
     extraOptions: fetchResult.extraOptions,
     legendSets: fetchResult.legendSets
-  }, props)), contextualMenuRef && createPortal(React.createElement("div", {
+  }, props)), contextualMenuRect && createPortal(React.createElement("div", {
     onClick: closeContextualMenu,
     style: styles.backdrop
   }, React.createElement(Popper, {
-    reference: contextualMenuRef,
+    reference: virtualContextualMenuElement,
     placement: "right"
   }, React.createElement(ContextualMenu, {
     config: contextualMenuConfig,
