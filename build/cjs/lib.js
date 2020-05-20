@@ -297,6 +297,14 @@ PivotPlugin.propTypes = {
   style: PropTypes.object
 };
 
+var enTranslations = {
+	"No data": ""
+};
+
+//------------------------------------------------------------------------------
+var namespace = 'default';
+i18n.addResources('en', namespace, enTranslations);
+
 var peId = 'pe';
 var apiFetchAnalytics =
 /*#__PURE__*/
