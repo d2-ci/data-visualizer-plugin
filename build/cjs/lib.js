@@ -231,7 +231,7 @@ var orgUnitsQuery = {
       return _id;
     },
     params: {
-      fields: 'id,level,displayName~rename(name),parent[id,displayName~rename(name)],children[level]',
+      fields: 'id,level,displayName~rename(name),path,parent[id,displayName~rename(name)],children[level]',
       paging: 'false',
       userDataViewFallback: 'true'
     }
@@ -401,11 +401,24 @@ var ContextualMenu = function ContextualMenu(_ref) {
   }, [ouData]);
   return React__default.createElement(uiCore.Menu, null, ouData && React__default.createElement(uiCore.MenuItem, {
     dense: true,
-    label: i18n.t('Org. unit drill down/up')
-  }, React__default.createElement(uiCore.Menu, null, subLevelData && React__default.createElement(React__default.Fragment, null, React__default.createElement(uiCore.MenuItem, {
+    label: i18n.t('Org unit drill down/up')
+  }, React__default.createElement(uiCore.Menu, {
+    maxWidth: "320px"
+  }, (ouData === null || ouData === void 0 ? void 0 : ouData.parent) && React__default.createElement(React__default.Fragment, null, React__default.createElement(uiCore.MenuItem, {
+    dense: true,
+    icon: React__default.createElement(ArrowUpwardIcon, null),
+    label: ouData.parent.name,
+    onClick: function onClick() {
+      return _onClick({
+        ou: {
+          id: ouData.parent.id
+        }
+      });
+    }
+  }), subLevelData && React__default.createElement(uiCore.Divider, null)), subLevelData && React__default.createElement(uiCore.MenuItem, {
     dense: true,
     icon: React__default.createElement(ArrowDownwardIcon, null),
-    label: i18n.t('Show {{level}} level in {{orgunit}}', {
+    label: i18n.t('{{level}} level in {{orgunit}}', {
       level: subLevelData.name,
       orgunit: ouData.name
     }),
@@ -413,20 +426,8 @@ var ContextualMenu = function ContextualMenu(_ref) {
       return _onClick({
         ou: {
           id: ouData.id,
+          path: ouData.path,
           level: subLevelData.id
-        }
-      });
-    }
-  }), (ouData === null || ouData === void 0 ? void 0 : ouData.parent) && React__default.createElement(uiCore.Divider, null)), (ouData === null || ouData === void 0 ? void 0 : ouData.parent) && React__default.createElement(uiCore.MenuItem, {
-    dense: true,
-    icon: React__default.createElement(ArrowUpwardIcon, null),
-    label: i18n.t('Show {{orgunit}}', {
-      orgunit: ouData.parent.name
-    }),
-    onClick: function onClick() {
-      return _onClick({
-        ou: {
-          id: ouData.parent.id
         }
       });
     }
@@ -1047,24 +1048,6 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
 
   var onContextualMenuItemClick = function onContextualMenuItemClick(args) {
     closeContextualMenu();
-
-    if (args.ou) {
-      var ouItems = [{
-        id: args.ou.id,
-        name: args.ou.name
-      }];
-
-      if (args.ou.level) {
-        var levelData = ouLevels.find(function (item) {
-          return item.id === args.ou.level;
-        });
-        ouItems.push({
-          id: levelData.id,
-          name: levelData.name
-        });
-      }
-    }
-
     onDrill(args);
   };
 

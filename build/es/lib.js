@@ -226,7 +226,7 @@ var orgUnitsQuery = {
       return _id;
     },
     params: {
-      fields: 'id,level,displayName~rename(name),parent[id,displayName~rename(name)],children[level]',
+      fields: 'id,level,displayName~rename(name),path,parent[id,displayName~rename(name)],children[level]',
       paging: 'false',
       userDataViewFallback: 'true'
     }
@@ -396,11 +396,24 @@ var ContextualMenu = function ContextualMenu(_ref) {
   }, [ouData]);
   return React.createElement(Menu, null, ouData && React.createElement(MenuItem, {
     dense: true,
-    label: i18n.t('Org. unit drill down/up')
-  }, React.createElement(Menu, null, subLevelData && React.createElement(React.Fragment, null, React.createElement(MenuItem, {
+    label: i18n.t('Org unit drill down/up')
+  }, React.createElement(Menu, {
+    maxWidth: "320px"
+  }, (ouData === null || ouData === void 0 ? void 0 : ouData.parent) && React.createElement(React.Fragment, null, React.createElement(MenuItem, {
+    dense: true,
+    icon: React.createElement(ArrowUpwardIcon, null),
+    label: ouData.parent.name,
+    onClick: function onClick() {
+      return _onClick({
+        ou: {
+          id: ouData.parent.id
+        }
+      });
+    }
+  }), subLevelData && React.createElement(Divider, null)), subLevelData && React.createElement(MenuItem, {
     dense: true,
     icon: React.createElement(ArrowDownwardIcon, null),
-    label: i18n.t('Show {{level}} level in {{orgunit}}', {
+    label: i18n.t('{{level}} level in {{orgunit}}', {
       level: subLevelData.name,
       orgunit: ouData.name
     }),
@@ -408,20 +421,8 @@ var ContextualMenu = function ContextualMenu(_ref) {
       return _onClick({
         ou: {
           id: ouData.id,
+          path: ouData.path,
           level: subLevelData.id
-        }
-      });
-    }
-  }), (ouData === null || ouData === void 0 ? void 0 : ouData.parent) && React.createElement(Divider, null)), (ouData === null || ouData === void 0 ? void 0 : ouData.parent) && React.createElement(MenuItem, {
-    dense: true,
-    icon: React.createElement(ArrowUpwardIcon, null),
-    label: i18n.t('Show {{orgunit}}', {
-      orgunit: ouData.parent.name
-    }),
-    onClick: function onClick() {
-      return _onClick({
-        ou: {
-          id: ouData.parent.id
         }
       });
     }
@@ -1042,24 +1043,6 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
 
   var onContextualMenuItemClick = function onContextualMenuItemClick(args) {
     closeContextualMenu();
-
-    if (args.ou) {
-      var ouItems = [{
-        id: args.ou.id,
-        name: args.ou.name
-      }];
-
-      if (args.ou.level) {
-        var levelData = ouLevels.find(function (item) {
-          return item.id === args.ou.level;
-        });
-        ouItems.push({
-          id: levelData.id,
-          name: levelData.name
-        });
-      }
-    }
-
     onDrill(args);
   };
 
