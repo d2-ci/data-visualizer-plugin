@@ -2,7 +2,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
-import { useDataEngine } from '@dhis2/app-runtime';
+import { useDataEngine, useDataQuery } from '@dhis2/app-runtime';
 import { Menu, MenuItem, Divider, Popper } from '@dhis2/ui-core';
 import { createVisualization, isSingleValue, PivotTable, VIS_TYPE_PIVOT_TABLE, isYearOverYear } from '@dhis2/analytics';
 import i18n from '@dhis2/d2-i18n';
@@ -210,7 +210,7 @@ var apiFetchLegendSets = function apiFetchLegendSets(dataEngine, ids) {
 };
 
 var orgUnitLevelsQuery = {
-  orgUnitsLevels: {
+  orgUnitLevels: {
     resource: 'organisationUnitLevels',
     params: {
       fields: 'id,level,displayName~rename(name)',
@@ -231,9 +231,6 @@ var orgUnitsQuery = {
       userDataViewFallback: 'true'
     }
   }
-};
-var apiFetchOrganisationUnitLevels = function apiFetchOrganisationUnitLevels(dataEngine) {
-  return dataEngine.query(orgUnitLevelsQuery);
 };
 var apiFetchOrganisationUnit = function apiFetchOrganisationUnit(dataEngine, id) {
   return dataEngine.query(orgUnitsQuery, {
@@ -1027,11 +1024,6 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
       contextualMenuConfig = _useState6[0],
       setContextualMenuConfig = _useState6[1];
 
-  var _useState7 = useState(null),
-      _useState8 = _slicedToArray(_useState7, 2),
-      ouLevels = _useState8[0],
-      setOuLevels = _useState8[1];
-
   var onToggleContextualMenu = function onToggleContextualMenu(ref, data) {
     setContextualMenuRef(ref);
     setContextualMenuConfig(data);
@@ -1046,6 +1038,12 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
     onDrill(args);
   };
 
+  var _useDataQuery = useDataQuery(orgUnitLevelsQuery, {
+    onError: onError
+  }),
+      ouLevelsResponse = _useDataQuery.data;
+
+  var ouLevels = ouLevelsResponse === null || ouLevelsResponse === void 0 ? void 0 : ouLevelsResponse.orgUnitLevels.organisationUnitLevels;
   var doFetchData = useCallback(
   /*#__PURE__*/
   _asyncToGenerator(
@@ -1124,92 +1122,31 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
       return _ref3.apply(this, arguments);
     };
   }(), [engine]);
-  var doFetchOuLevelsData = useCallback(
-  /*#__PURE__*/
-  _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee3() {
-    var ouLevelsData;
-    return regeneratorRuntime.wrap(function _callee3$(_context3) {
-      while (1) {
-        switch (_context3.prev = _context3.next) {
-          case 0:
-            _context3.next = 2;
-            return apiFetchOrganisationUnitLevels(engine);
-
-          case 2:
-            ouLevelsData = _context3.sent;
-            return _context3.abrupt("return", ouLevelsData.orgUnitsLevels.organisationUnitLevels);
-
-          case 4:
-          case "end":
-            return _context3.stop();
-        }
-      }
-    }, _callee3);
-  })), [engine]);
-  useEffect(function () {
-    var doFetch =
-    /*#__PURE__*/
-    function () {
-      var _ref5 = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee4() {
-        var orgUnitLevels;
-        return regeneratorRuntime.wrap(function _callee4$(_context4) {
-          while (1) {
-            switch (_context4.prev = _context4.next) {
-              case 0:
-                _context4.next = 2;
-                return doFetchOuLevelsData();
-
-              case 2:
-                orgUnitLevels = _context4.sent;
-                setOuLevels(orgUnitLevels);
-
-              case 4:
-              case "end":
-                return _context4.stop();
-            }
-          }
-        }, _callee4);
-      }));
-
-      return function doFetch() {
-        return _ref5.apply(this, arguments);
-      };
-    }();
-
-    doFetch().catch(function (error) {
-      return onError(error);
-    });
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, []);
   useEffect(function () {
     setFetchResult(null);
 
     var doFetchAll =
     /*#__PURE__*/
     function () {
-      var _ref6 = _asyncToGenerator(
+      var _ref4 = _asyncToGenerator(
       /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee5() {
-        var _ref7, responses, extraOptions, legendSetIds, dxIds, legendSets;
+      regeneratorRuntime.mark(function _callee3() {
+        var _ref5, responses, extraOptions, legendSetIds, dxIds, legendSets;
 
-        return regeneratorRuntime.wrap(function _callee5$(_context5) {
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context5.prev = _context5.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
-                _context5.next = 2;
+                _context3.next = 2;
                 return doFetchData(visualization, filters, forDashboard);
 
               case 2:
-                _ref7 = _context5.sent;
-                responses = _ref7.responses;
-                extraOptions = _ref7.extraOptions;
+                _ref5 = _context3.sent;
+                responses = _ref5.responses;
+                extraOptions = _ref5.extraOptions;
                 legendSetIds = [];
-                _context5.t0 = visualization.legendDisplayStrategy;
-                _context5.next = _context5.t0 === LEGEND_DISPLAY_STRATEGY_FIXED ? 9 : _context5.t0 === LEGEND_DISPLAY_STRATEGY_BY_DATA_ITEM ? 11 : 14;
+                _context3.t0 = visualization.legendDisplayStrategy;
+                _context3.next = _context3.t0 === LEGEND_DISPLAY_STRATEGY_FIXED ? 9 : _context3.t0 === LEGEND_DISPLAY_STRATEGY_BY_DATA_ITEM ? 11 : 14;
                 break;
 
               case 9:
@@ -1217,7 +1154,7 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
                   legendSetIds.push(visualization.legendSet.id);
                 }
 
-                return _context5.abrupt("break", 14);
+                return _context3.abrupt("break", 14);
 
               case 11:
                 // parse responses to extract legendSet ids from metaData
@@ -1232,14 +1169,14 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
                     legendSetIds.push(legendSetId);
                   }
                 });
-                return _context5.abrupt("break", 14);
+                return _context3.abrupt("break", 14);
 
               case 14:
-                _context5.next = 16;
+                _context3.next = 16;
                 return doFetchLegendSets(legendSetIds);
 
               case 16:
-                legendSets = _context5.sent;
+                legendSets = _context3.sent;
                 setFetchResult({
                   visualization: visualization,
                   legendSets: legendSets,
@@ -1250,14 +1187,14 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
 
               case 19:
               case "end":
-                return _context5.stop();
+                return _context3.stop();
             }
           }
-        }, _callee5);
+        }, _callee3);
       }));
 
       return function doFetchAll() {
-        return _ref6.apply(this, arguments);
+        return _ref4.apply(this, arguments);
       };
     }();
 
