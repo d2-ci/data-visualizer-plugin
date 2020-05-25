@@ -396,15 +396,19 @@ var ContextualMenu = function ContextualMenu(_ref) {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
 
   }, [ouData]);
+  var menuItemStyle = {
+    display: 'inline-block',
+    minWidth: 200
+  };
   return React__default.createElement(uiCore.Menu, null, ouData && React__default.createElement(uiCore.MenuItem, {
     dense: true,
     label: i18n.t('Org unit drill down/up')
-  }, React__default.createElement(uiCore.Menu, {
-    maxWidth: "320px"
-  }, (ouData === null || ouData === void 0 ? void 0 : ouData.parent) && React__default.createElement(React__default.Fragment, null, React__default.createElement(uiCore.MenuItem, {
+  }, React__default.createElement(uiCore.Menu, null, (ouData === null || ouData === void 0 ? void 0 : ouData.parent) && React__default.createElement(React__default.Fragment, null, React__default.createElement(uiCore.MenuItem, {
     dense: true,
     icon: React__default.createElement(ArrowUpwardIcon, null),
-    label: ouData.parent.name,
+    label: React__default.createElement("span", {
+      style: menuItemStyle
+    }, ouData.parent.name),
     onClick: function onClick() {
       return _onClick({
         ou: {
@@ -415,10 +419,12 @@ var ContextualMenu = function ContextualMenu(_ref) {
   }), subLevelData && React__default.createElement(uiCore.Divider, null)), subLevelData && React__default.createElement(uiCore.MenuItem, {
     dense: true,
     icon: React__default.createElement(ArrowDownwardIcon, null),
-    label: i18n.t('{{level}} level in {{orgunit}}', {
+    label: React__default.createElement("span", {
+      style: menuItemStyle
+    }, i18n.t('{{level}} level in {{orgunit}}', {
       level: subLevelData.name,
       orgunit: ouData.name
-    }),
+    })),
     onClick: function onClick() {
       return _onClick({
         ou: {
