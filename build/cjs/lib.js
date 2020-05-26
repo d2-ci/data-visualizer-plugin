@@ -402,7 +402,7 @@ var ContextualMenu = function ContextualMenu(_ref) {
   };
   return React__default.createElement(uiCore.Menu, null, ouData && React__default.createElement(uiCore.MenuItem, {
     dense: true,
-    label: i18n.t('Org unit drill down/up')
+    label: i18n.t('Change org unit')
   }, React__default.createElement(uiCore.Menu, null, (ouData === null || ouData === void 0 ? void 0 : ouData.parent) && React__default.createElement(React__default.Fragment, null, React__default.createElement(uiCore.MenuItem, {
     dense: true,
     icon: React__default.createElement(ArrowUpwardIcon, null),
@@ -1229,7 +1229,7 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
     visualization: fetchResult.visualization,
     responses: fetchResult.responses,
     legendSets: fetchResult.legendSets,
-    onToggleContextualMenu: onToggleContextualMenu
+    onToggleContextualMenu: onDrill ? onToggleContextualMenu : undefined
   }, props)) : React__default.createElement(ChartPlugin, _extends({
     visualization: fetchResult.visualization,
     responses: fetchResult.responses,
@@ -1250,7 +1250,6 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
 VisualizationPlugin.defaultProps = {
   filters: {},
   forDashboard: false,
-  onDrill: Function.prototype,
   onError: Function.prototype,
   onLoadingComplete: Function.prototype,
   onResponsesReceived: Function.prototype,
