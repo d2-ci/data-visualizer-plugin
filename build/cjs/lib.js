@@ -5,9 +5,11 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var React = require('react');
 var React__default = _interopDefault(React);
-var analytics = require('@dhis2/analytics');
-var appRuntime = require('@dhis2/app-runtime');
+var reactDom = require('react-dom');
 var PropTypes = _interopDefault(require('prop-types'));
+var appRuntime = require('@dhis2/app-runtime');
+var uiCore = require('@dhis2/ui-core');
+var analytics = require('@dhis2/analytics');
 var i18n = _interopDefault(require('@dhis2/d2-i18n'));
 require('lodash-es/pick');
 
@@ -212,6 +214,234 @@ var apiFetchLegendSets = function apiFetchLegendSets(dataEngine, ids) {
   });
 };
 
+var orgUnitLevelsQuery = {
+  orgUnitLevels: {
+    resource: 'organisationUnitLevels',
+    params: {
+      fields: 'id,level,displayName~rename(name)',
+      paging: 'false'
+    }
+  }
+};
+var orgUnitsQuery = {
+  orgUnits: {
+    resource: 'organisationUnits',
+    id: function id(_ref) {
+      var _id = _ref.id;
+      return _id;
+    },
+    params: {
+      fields: 'id,level,displayName~rename(name),path,parent[id,displayName~rename(name)],children[level]',
+      paging: 'false',
+      userDataViewFallback: 'true'
+    }
+  }
+};
+var apiFetchOrganisationUnit = function apiFetchOrganisationUnit(dataEngine, id) {
+  return dataEngine.query(orgUnitsQuery, {
+    variables: {
+      id: id
+    }
+  });
+};
+
+var ArrowUpwardIcon = function ArrowUpwardIcon(_ref) {
+  var _ref$style = _ref.style,
+      style = _ref$style === void 0 ? {
+    width: 18,
+    height: 18
+  } : _ref$style;
+  return React__default.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    style: style
+  }, React__default.createElement("path", {
+    d: "M0 0h24v24H0V0z",
+    fill: "none"
+  }), React__default.createElement("path", {
+    d: "M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z",
+    fill: "black"
+  }));
+};
+
+ArrowUpwardIcon.propTypes = {
+  style: PropTypes.object
+};
+
+var ArrowDownwardIcon = function ArrowDownwardIcon(_ref) {
+  var _ref$style = _ref.style,
+      style = _ref$style === void 0 ? {
+    width: 18,
+    height: 18
+  } : _ref$style;
+  return React__default.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    viewBox: "0 0 24 24",
+    style: style
+  }, React__default.createElement("path", {
+    d: "M0 0h24v24H0V0z",
+    fill: "none"
+  }), React__default.createElement("path", {
+    d: "M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z",
+    fill: "black"
+  }));
+};
+
+ArrowDownwardIcon.propTypes = {
+  style: PropTypes.object
+};
+
+var ContextualMenu = function ContextualMenu(_ref) {
+  var config = _ref.config,
+      ouLevels = _ref.ouLevels,
+      _onClick = _ref.onClick;
+  var engine = appRuntime.useDataEngine();
+
+  var _useState = React.useState(undefined),
+      _useState2 = _slicedToArray(_useState, 2),
+      ouData = _useState2[0],
+      setOuData = _useState2[1];
+
+  var _useState3 = React.useState(undefined),
+      _useState4 = _slicedToArray(_useState3, 2),
+      subLevelData = _useState4[0],
+      setSubLevelData = _useState4[1];
+
+  var lookupLevel = function lookupLevel(levelId) {
+    return ouLevels.find(function (item) {
+      return item.level === levelId;
+    });
+  };
+
+  var doFetchOuData = React.useCallback(
+  /*#__PURE__*/
+  function () {
+    var _ref2 = _asyncToGenerator(
+    /*#__PURE__*/
+    regeneratorRuntime.mark(function _callee(ouId) {
+      var ouData;
+      return regeneratorRuntime.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _context.next = 2;
+              return apiFetchOrganisationUnit(engine, ouId);
+
+            case 2:
+              ouData = _context.sent;
+              return _context.abrupt("return", ouData.orgUnits);
+
+            case 4:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee);
+    }));
+
+    return function (_x) {
+      return _ref2.apply(this, arguments);
+    };
+  }(), [engine]);
+  React.useEffect(function () {
+    setOuData(null);
+
+    var doFetch =
+    /*#__PURE__*/
+    function () {
+      var _ref3 = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2() {
+        var orgUnit;
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.next = 2;
+                return doFetchOuData(config.ouId);
+
+              case 2:
+                orgUnit = _context2.sent;
+                setOuData(orgUnit);
+
+              case 4:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2);
+      }));
+
+      return function doFetch() {
+        return _ref3.apply(this, arguments);
+      };
+    }();
+
+    if (config.ouId) {
+      doFetch();
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+
+  }, [config]);
+  React.useEffect(function () {
+    setSubLevelData(null);
+
+    if (ouData === null || ouData === void 0 ? void 0 : ouData.children.length) {
+      var levelData = lookupLevel(ouData.children[0].level);
+
+      if (levelData) {
+        setSubLevelData(levelData);
+      }
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+
+  }, [ouData]);
+  var menuItemStyle = {
+    display: 'inline-block',
+    minWidth: 200
+  };
+  return React__default.createElement(uiCore.Menu, null, ouData && React__default.createElement(uiCore.MenuItem, {
+    dense: true,
+    label: i18n.t('Change org unit')
+  }, React__default.createElement(uiCore.Menu, null, (ouData === null || ouData === void 0 ? void 0 : ouData.parent) && React__default.createElement(React__default.Fragment, null, React__default.createElement(uiCore.MenuItem, {
+    dense: true,
+    icon: React__default.createElement(ArrowUpwardIcon, null),
+    label: React__default.createElement("span", {
+      style: menuItemStyle
+    }, ouData.parent.name),
+    onClick: function onClick() {
+      return _onClick({
+        ou: {
+          id: ouData.parent.id
+        }
+      });
+    }
+  }), subLevelData && React__default.createElement(uiCore.Divider, null)), subLevelData && React__default.createElement(uiCore.MenuItem, {
+    dense: true,
+    icon: React__default.createElement(ArrowDownwardIcon, null),
+    label: React__default.createElement("span", {
+      style: menuItemStyle
+    }, i18n.t('{{level}} level in {{orgunit}}', {
+      level: subLevelData.name,
+      orgunit: ouData.name
+    })),
+    onClick: function onClick() {
+      return _onClick({
+        ou: {
+          id: ouData.id,
+          path: ouData.path,
+          level: subLevelData.id
+        }
+      });
+    }
+  }))));
+};
+ContextualMenu.propTypes = {
+  config: PropTypes.object,
+  ouLevels: PropTypes.array,
+  onClick: PropTypes.func
+};
+
 var ChartPlugin = function ChartPlugin(_ref) {
   var visualization = _ref.visualization,
       responses = _ref.responses,
@@ -275,14 +505,16 @@ var PivotPlugin = function PivotPlugin(_ref) {
       legendSets = _ref.legendSets,
       visualization = _ref.visualization,
       style = _ref.style,
-      renderCounter = _ref.id;
+      renderCounter = _ref.id,
+      onToggleContextualMenu = _ref.onToggleContextualMenu;
   return React__default.createElement("div", {
     style: style
   }, React__default.createElement(analytics.PivotTable, {
     visualization: visualization,
     data: responses[0].response,
     legendSets: legendSets,
-    renderCounter: renderCounter
+    renderCounter: renderCounter,
+    onToggleContextualMenu: onToggleContextualMenu
   }));
 };
 
@@ -294,7 +526,8 @@ PivotPlugin.propTypes = {
   responses: PropTypes.arrayOf(PropTypes.object).isRequired,
   visualization: PropTypes.object.isRequired,
   id: PropTypes.number,
-  style: PropTypes.object
+  style: PropTypes.object,
+  onToggleContextualMenu: PropTypes.func
 };
 
 var peId = 'pe';
@@ -761,6 +994,17 @@ function () {
   };
 }();
 
+var styles = {
+  backdrop: {
+    position: 'fixed',
+    height: '100%',
+    width: '100%',
+    top: 0,
+    left: 0,
+    backgroundColor: 'transparent'
+  }
+};
+
 var LEGEND_DISPLAY_STRATEGY_BY_DATA_ITEM = 'BY_DATA_ITEM';
 var LEGEND_DISPLAY_STRATEGY_FIXED = 'FIXED';
 var VisualizationPlugin = function VisualizationPlugin(_ref) {
@@ -771,7 +1015,8 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
       onError = _ref.onError,
       onLoadingComplete = _ref.onLoadingComplete,
       onResponsesReceived = _ref.onResponsesReceived,
-      props = _objectWithoutProperties(_ref, ["d2", "visualization", "filters", "forDashboard", "onError", "onLoadingComplete", "onResponsesReceived"]);
+      onDrill = _ref.onDrill,
+      props = _objectWithoutProperties(_ref, ["d2", "visualization", "filters", "forDashboard", "onError", "onLoadingComplete", "onResponsesReceived", "onDrill"]);
 
   var engine = appRuntime.useDataEngine();
 
@@ -780,6 +1025,36 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
       fetchResult = _useState2[0],
       setFetchResult = _useState2[1];
 
+  var _useState3 = React.useState(undefined),
+      _useState4 = _slicedToArray(_useState3, 2),
+      contextualMenuRef = _useState4[0],
+      setContextualMenuRef = _useState4[1];
+
+  var _useState5 = React.useState({}),
+      _useState6 = _slicedToArray(_useState5, 2),
+      contextualMenuConfig = _useState6[0],
+      setContextualMenuConfig = _useState6[1];
+
+  var onToggleContextualMenu = function onToggleContextualMenu(ref, data) {
+    setContextualMenuRef(ref);
+    setContextualMenuConfig(data);
+  };
+
+  var closeContextualMenu = function closeContextualMenu() {
+    return setContextualMenuRef(undefined);
+  };
+
+  var onContextualMenuItemClick = function onContextualMenuItemClick(args) {
+    closeContextualMenu();
+    onDrill(args);
+  };
+
+  var _useDataQuery = appRuntime.useDataQuery(orgUnitLevelsQuery, {
+    onError: onError
+  }),
+      ouLevelsResponse = _useDataQuery.data;
+
+  var ouLevels = ouLevelsResponse === null || ouLevelsResponse === void 0 ? void 0 : ouLevelsResponse.orgUnitLevels.organisationUnitLevels;
   var doFetchData = React.useCallback(
   /*#__PURE__*/
   _asyncToGenerator(
@@ -944,20 +1219,33 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
     return null;
   }
 
-  if (!fetchResult.visualization.type || fetchResult.visualization.type === analytics.VIS_TYPE_PIVOT_TABLE) {
-    return React__default.createElement(PivotPlugin, _extends({
-      visualization: fetchResult.visualization,
-      responses: fetchResult.responses,
-      legendSets: fetchResult.legendSets
-    }, props));
-  } else {
-    return React__default.createElement(ChartPlugin, _extends({
-      visualization: fetchResult.visualization,
-      responses: fetchResult.responses,
-      extraOptions: fetchResult.extraOptions,
-      legendSets: fetchResult.legendSets
-    }, props));
-  }
+  var contextualMenuRect = contextualMenuRef && contextualMenuRef.current && contextualMenuRef.current.getBoundingClientRect();
+  var virtualContextualMenuElement = contextualMenuRect ? {
+    getBoundingClientRect: function getBoundingClientRect() {
+      return contextualMenuRect;
+    }
+  } : null;
+  return React__default.createElement(React__default.Fragment, null, !fetchResult.visualization.type || fetchResult.visualization.type === analytics.VIS_TYPE_PIVOT_TABLE ? React__default.createElement(PivotPlugin, _extends({
+    visualization: fetchResult.visualization,
+    responses: fetchResult.responses,
+    legendSets: fetchResult.legendSets,
+    onToggleContextualMenu: onDrill ? onToggleContextualMenu : undefined
+  }, props)) : React__default.createElement(ChartPlugin, _extends({
+    visualization: fetchResult.visualization,
+    responses: fetchResult.responses,
+    extraOptions: fetchResult.extraOptions,
+    legendSets: fetchResult.legendSets
+  }, props)), contextualMenuRect && reactDom.createPortal(React__default.createElement("div", {
+    onClick: closeContextualMenu,
+    style: styles.backdrop
+  }, React__default.createElement(uiCore.Popper, {
+    reference: virtualContextualMenuElement,
+    placement: "right"
+  }, React__default.createElement(ContextualMenu, {
+    config: contextualMenuConfig,
+    ouLevels: ouLevels,
+    onClick: onContextualMenuItemClick
+  }))), document.body));
 };
 VisualizationPlugin.defaultProps = {
   filters: {},
@@ -972,6 +1260,7 @@ VisualizationPlugin.propTypes = {
   visualization: PropTypes.object.isRequired,
   filters: PropTypes.object,
   forDashboard: PropTypes.bool,
+  onDrill: PropTypes.func,
   onError: PropTypes.func,
   onLoadingComplete: PropTypes.func,
   onResponsesReceived: PropTypes.func
