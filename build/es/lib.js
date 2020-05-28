@@ -3,44 +3,7 @@ import React, { useRef, useCallback, useEffect, useState } from 'react';
 import { createVisualization, isSingleValue, PivotTable, VIS_TYPE_PIVOT_TABLE, isYearOverYear } from '@dhis2/analytics';
 import { useDataEngine } from '@dhis2/app-runtime';
 import PropTypes from 'prop-types';
-import i18n from '@dhis2/d2-i18n';
 import 'lodash-es/pick';
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
-  try {
-    var info = gen[key](arg);
-    var value = info.value;
-  } catch (error) {
-    reject(error);
-    return;
-  }
-
-  if (info.done) {
-    resolve(value);
-  } else {
-    Promise.resolve(value).then(_next, _throw);
-  }
-}
-
-function _asyncToGenerator(fn) {
-  return function () {
-    var self = this,
-        args = arguments;
-    return new Promise(function (resolve, reject) {
-      var gen = fn.apply(self, args);
-
-      function _next(value) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
-      }
-
-      function _throw(err) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
-      }
-
-      _next(undefined);
-    });
-  };
-}
 
 function _defineProperty(obj, key, value) {
   if (key in obj) {
@@ -145,82 +108,38 @@ function _objectWithoutProperties(source, excluded) {
   return target;
 }
 
-function _slicedToArray(arr, i) {
-  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
-}
-
-function _arrayWithHoles(arr) {
-  if (Array.isArray(arr)) return arr;
-}
-
-function _iterableToArrayLimit(arr, i) {
-  if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
-    return;
-  }
-
-  var _arr = [];
-  var _n = true;
-  var _d = false;
-  var _e = undefined;
-
-  try {
-    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-      _arr.push(_s.value);
-
-      if (i && _arr.length === i) break;
-    }
-  } catch (err) {
-    _d = true;
-    _e = err;
-  } finally {
-    try {
-      if (!_n && _i["return"] != null) _i["return"]();
-    } finally {
-      if (_d) throw _e;
-    }
-  }
-
-  return _arr;
-}
-
-function _nonIterableRest() {
-  throw new TypeError("Invalid attempt to destructure non-iterable instance");
-}
-
-var legendSetsQuery = {
+const legendSetsQuery = {
   legendSets: {
     resource: 'legendSets',
-    params: function params(_ref) {
-      var ids = _ref.ids;
-      return {
-        fields: 'id,legends[id,displayName~rename(name),startValue,endValue,color]',
-        filter: "id:in:[".concat(ids.join(','), "]")
-      };
-    }
+    params: ({
+      ids
+    }) => ({
+      fields: 'id,legends[id,displayName~rename(name),startValue,endValue,color]',
+      filter: "id:in:[".concat(ids.join(','), "]")
+    })
   }
 };
-var apiFetchLegendSets = function apiFetchLegendSets(dataEngine, ids) {
-  return dataEngine.query(legendSetsQuery, {
-    variables: {
-      ids: ids
-    }
-  });
-};
+const apiFetchLegendSets = (dataEngine, ids) => dataEngine.query(legendSetsQuery, {
+  variables: {
+    ids
+  }
+});
 
-var ChartPlugin = function ChartPlugin(_ref) {
-  var visualization = _ref.visualization,
-      responses = _ref.responses,
-      extraOptions = _ref.extraOptions,
-      legendSets = _ref.legendSets,
-      renderCounter = _ref.id,
-      style = _ref.style,
-      onChartGenerated = _ref.onChartGenerated,
-      defaultAnimation = _ref.animation;
-  var canvasRef = useRef(undefined);
-  var renderVisualization = useCallback(function (animation) {
-    var visualizationConfig = createVisualization(responses, visualization, canvasRef.current, _objectSpread2({}, extraOptions, {
-      animation: animation,
-      legendSets: legendSets
+const ChartPlugin = ({
+  visualization,
+  responses,
+  extraOptions,
+  legendSets,
+  id: renderCounter,
+  style,
+  onChartGenerated,
+  animation: defaultAnimation
+}) => {
+  const canvasRef = useRef(undefined);
+  const renderVisualization = useCallback(animation => {
+    const visualizationConfig = createVisualization(responses, visualization, canvasRef.current, _objectSpread2(_objectSpread2({}, extraOptions), {}, {
+      animation,
+      legendSets
     }), undefined, undefined, isSingleValue(visualization.type) ? 'dhis' : 'highcharts' // output format
     );
 
@@ -233,15 +152,15 @@ var ChartPlugin = function ChartPlugin(_ref) {
       }));
     }
   }, [canvasRef, visualization, onChartGenerated, responses, extraOptions, legendSets]);
-  useEffect(function () {
+  useEffect(() => {
     renderVisualization(defaultAnimation);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [visualization, responses, extraOptions]);
-  useEffect(function () {
+  useEffect(() => {
     renderVisualization(0);
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [renderCounter, style]);
-  return React.createElement("div", {
+  return /*#__PURE__*/React.createElement("div", {
     ref: canvasRef,
     style: style
   });
@@ -265,15 +184,16 @@ ChartPlugin.propTypes = {
   onChartGenerated: PropTypes.func
 };
 
-var PivotPlugin = function PivotPlugin(_ref) {
-  var responses = _ref.responses,
-      legendSets = _ref.legendSets,
-      visualization = _ref.visualization,
-      style = _ref.style,
-      renderCounter = _ref.id;
-  return React.createElement("div", {
+const PivotPlugin = ({
+  responses,
+  legendSets,
+  visualization,
+  style,
+  id: renderCounter
+}) => {
+  return /*#__PURE__*/React.createElement("div", {
     style: style
-  }, React.createElement(PivotTable, {
+  }, /*#__PURE__*/React.createElement(PivotTable, {
     visualization: visualization,
     data: responses[0].response,
     legendSets: legendSets,
@@ -292,95 +212,39 @@ PivotPlugin.propTypes = {
   style: PropTypes.object
 };
 
-var peId = 'pe';
-var apiFetchAnalytics =
-/*#__PURE__*/
-function () {
-  var _ref = _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee(d2, current, options) {
-    var req, rawResponse;
-    return regeneratorRuntime.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            req = new d2.analytics.request().fromModel(current).withParameters(options).withIncludeNumDen(current.type === VIS_TYPE_PIVOT_TABLE);
-            _context.next = 3;
-            return d2.analytics.aggregate.get(req);
+const peId = 'pe';
+const apiFetchAnalytics = async (d2, current, options) => {
+  const req = new d2.analytics.request().fromModel(current).withParameters(options).withIncludeNumDen(current.type === VIS_TYPE_PIVOT_TABLE);
+  const rawResponse = await d2.analytics.aggregate.get(req);
+  return [new d2.analytics.response(rawResponse)];
+};
+const apiFetchAnalyticsForYearOverYear = async (d2, current, options) => {
+  let yearlySeriesReq = new d2.analytics.request().addPeriodDimension(current.yearlySeries).withSkipData(true).withSkipMeta(false).withIncludeMetadataDetails(true);
 
-          case 3:
-            rawResponse = _context.sent;
-            return _context.abrupt("return", [new d2.analytics.response(rawResponse)]);
+  if (options.relativePeriodDate) {
+    yearlySeriesReq = yearlySeriesReq.withRelativePeriodDate(options.relativePeriodDate);
+  }
 
-          case 5:
-          case "end":
-            return _context.stop();
-        }
-      }
-    }, _callee);
+  const yearlySeriesRes = await d2.analytics.aggregate.fetch(yearlySeriesReq);
+  const requests = [];
+  const yearlySeriesLabels = [];
+  const now = new Date();
+  const currentDay = ('' + now.getDate()).padStart(2, 0);
+  const currentMonth = ('' + (now.getMonth() + 1)).padStart(2, 0);
+  yearlySeriesRes.metaData.dimensions[peId].forEach(period => {
+    yearlySeriesLabels.push(yearlySeriesRes.metaData.items[period].name);
+    const startDate = "".concat(period, "-").concat(currentMonth, "-").concat(currentDay);
+    const req = new d2.analytics.request().fromModel(current).withParameters(options).withRelativePeriodDate(startDate);
+    requests.push(d2.analytics.aggregate.get(req));
+  });
+  return Promise.all(requests).then(responses => ({
+    responses: responses.map(res => new d2.analytics.response(res)),
+    yearlySeriesLabels
   }));
+};
 
-  return function apiFetchAnalytics(_x, _x2, _x3) {
-    return _ref.apply(this, arguments);
-  };
-}();
-var apiFetchAnalyticsForYearOverYear =
-/*#__PURE__*/
-function () {
-  var _ref2 = _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee2(d2, current, options) {
-    var yearlySeriesReq, yearlySeriesRes, requests, yearlySeriesLabels, now, currentDay, currentMonth;
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            yearlySeriesReq = new d2.analytics.request().addPeriodDimension(current.yearlySeries).withSkipData(true).withSkipMeta(false).withIncludeMetadataDetails(true);
-
-            if (options.relativePeriodDate) {
-              yearlySeriesReq = yearlySeriesReq.withRelativePeriodDate(options.relativePeriodDate);
-            }
-
-            _context2.next = 4;
-            return d2.analytics.aggregate.fetch(yearlySeriesReq);
-
-          case 4:
-            yearlySeriesRes = _context2.sent;
-            requests = [];
-            yearlySeriesLabels = [];
-            now = new Date();
-            currentDay = ('' + now.getDate()).padStart(2, 0);
-            currentMonth = ('' + (now.getMonth() + 1)).padStart(2, 0);
-            yearlySeriesRes.metaData.dimensions[peId].forEach(function (period) {
-              yearlySeriesLabels.push(yearlySeriesRes.metaData.items[period].name);
-              var startDate = "".concat(period, "-").concat(currentMonth, "-").concat(currentDay);
-              var req = new d2.analytics.request().fromModel(current).withParameters(options).withRelativePeriodDate(startDate);
-              requests.push(d2.analytics.aggregate.get(req));
-            });
-            return _context2.abrupt("return", Promise.all(requests).then(function (responses) {
-              return {
-                responses: responses.map(function (res) {
-                  return new d2.analytics.response(res);
-                }),
-                yearlySeriesLabels: yearlySeriesLabels
-              };
-            }));
-
-          case 12:
-          case "end":
-            return _context2.stop();
-        }
-      }
-    }, _callee2);
-  }));
-
-  return function apiFetchAnalyticsForYearOverYear(_x4, _x5, _x6) {
-    return _ref2.apply(this, arguments);
-  };
-}();
-
-var computeGenericPeriodNames = function computeGenericPeriodNames(responses) {
-  var xAxisRes = responses.reduce(function (out, res) {
+const computeGenericPeriodNames = responses => {
+  const xAxisRes = responses.reduce((out, res) => {
     if (out.metaData) {
       if (res.metaData.dimensions.pe.length > out.metaData.dimensions.pe.length) {
         out = res;
@@ -391,9 +255,9 @@ var computeGenericPeriodNames = function computeGenericPeriodNames(responses) {
 
     return out;
   }, {});
-  var metadata = xAxisRes.metaData;
-  return metadata.dimensions.pe.reduce(function (genericPeriodNames, periodId) {
-    var name = metadata.items[periodId].name; // until the day the backend will support this in the API:
+  const metadata = xAxisRes.metaData;
+  return metadata.dimensions.pe.reduce((genericPeriodNames, periodId) => {
+    const name = metadata.items[periodId].name; // until the day the backend will support this in the API:
     // trim off the trailing year in the period name
     // english names should all have the year at the end of the string
 
@@ -402,7 +266,7 @@ var computeGenericPeriodNames = function computeGenericPeriodNames(responses) {
   }, []);
 };
 
-var options = {
+const options = {
   baseLineLabel: {
     defaultValue: undefined,
     requestable: false,
@@ -653,19 +517,13 @@ var options = {
     savable: true
   }
 };
-var getOptionsForRequest = function getOptionsForRequest() {
-  return Object.entries(options).filter(function (entry) {
-    return entry[1].requestable;
-  } // entry = [option, props]
+const getOptionsForRequest = () => {
+  return Object.entries(options).filter(entry => entry[1].requestable // entry = [option, props]
   );
 };
 
-var getRequestOptions = function getRequestOptions(visualization, filters) {
-  var options = getOptionsForRequest().reduce(function (map, _ref) {
-    var _ref2 = _slicedToArray(_ref, 2),
-        option = _ref2[0],
-        props = _ref2[1];
-
+const getRequestOptions = (visualization, filters) => {
+  const options = getOptionsForRequest().reduce((map, [option, props]) => {
     // only add parameter if value !== default
     if (visualization[option] !== undefined && visualization[option] !== props.defaultValue) {
       map[option] = visualization[option];
@@ -681,255 +539,132 @@ var getRequestOptions = function getRequestOptions(visualization, filters) {
 
 
   if (filters.userOrgUnit && filters.userOrgUnit.length) {
-    var ouIds = filters.userOrgUnit.map(function (ouPath) {
-      return ouPath.split('/').slice(-1)[0];
-    });
+    const ouIds = filters.userOrgUnit.map(ouPath => ouPath.split('/').slice(-1)[0]);
     options.userOrgUnit = ouIds.join(';');
   }
 
   return options;
 };
 
-var fetchData =
-/*#__PURE__*/
-function () {
-  var _ref2 = _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee(_ref) {
-    var visualization, filters, d2, forDashboard, options, extraOptions, _ref3, responses, yearlySeriesLabels;
-
-    return regeneratorRuntime.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            visualization = _ref.visualization, filters = _ref.filters, d2 = _ref.d2, forDashboard = _ref.forDashboard;
-            options = getRequestOptions(visualization, filters);
-            extraOptions = {
-              dashboard: forDashboard,
-              noData: {
-                text: i18n.t('No data')
-              }
-            };
-
-            if (!isYearOverYear(visualization.type)) {
-              _context.next = 10;
-              break;
-            }
-
-            _context.next = 6;
-            return apiFetchAnalyticsForYearOverYear(d2, visualization, options);
-
-          case 6:
-            _ref3 = _context.sent;
-            responses = _ref3.responses;
-            yearlySeriesLabels = _ref3.yearlySeriesLabels;
-            return _context.abrupt("return", {
-              responses: responses,
-              extraOptions: _objectSpread2({}, extraOptions, {
-                yearlySeries: yearlySeriesLabels,
-                xAxisLabels: computeGenericPeriodNames(responses)
-              })
-            });
-
-          case 10:
-            _context.next = 12;
-            return apiFetchAnalytics(d2, visualization, options);
-
-          case 12:
-            _context.t0 = _context.sent;
-            _context.t1 = extraOptions;
-            return _context.abrupt("return", {
-              responses: _context.t0,
-              extraOptions: _context.t1
-            });
-
-          case 15:
-          case "end":
-            return _context.stop();
-        }
-      }
-    }, _callee);
-  }));
-
-  return function fetchData(_x) {
-    return _ref2.apply(this, arguments);
+const fetchData = async ({
+  visualization,
+  filters,
+  d2,
+  forDashboard
+}) => {
+  const options = getRequestOptions(visualization, filters);
+  const extraOptions = {
+    dashboard: forDashboard
   };
-}();
 
-var LEGEND_DISPLAY_STRATEGY_BY_DATA_ITEM = 'BY_DATA_ITEM';
-var LEGEND_DISPLAY_STRATEGY_FIXED = 'FIXED';
-var VisualizationPlugin = function VisualizationPlugin(_ref) {
-  var d2 = _ref.d2,
-      visualization = _ref.visualization,
-      filters = _ref.filters,
-      forDashboard = _ref.forDashboard,
-      onError = _ref.onError,
-      onLoadingComplete = _ref.onLoadingComplete,
-      onResponsesReceived = _ref.onResponsesReceived,
+  if (isYearOverYear(visualization.type)) {
+    const {
+      responses,
+      yearlySeriesLabels
+    } = await apiFetchAnalyticsForYearOverYear(d2, visualization, options);
+    return {
+      responses,
+      extraOptions: _objectSpread2(_objectSpread2({}, extraOptions), {}, {
+        yearlySeries: yearlySeriesLabels,
+        xAxisLabels: computeGenericPeriodNames(responses)
+      })
+    };
+  }
+
+  return {
+    responses: await apiFetchAnalytics(d2, visualization, options),
+    extraOptions
+  };
+};
+
+const LEGEND_DISPLAY_STRATEGY_BY_DATA_ITEM = 'BY_DATA_ITEM';
+const LEGEND_DISPLAY_STRATEGY_FIXED = 'FIXED';
+const VisualizationPlugin = (_ref) => {
+  let {
+    d2,
+    visualization,
+    filters,
+    forDashboard,
+    onError,
+    onLoadingComplete,
+    onResponsesReceived
+  } = _ref,
       props = _objectWithoutProperties(_ref, ["d2", "visualization", "filters", "forDashboard", "onError", "onLoadingComplete", "onResponsesReceived"]);
 
-  var engine = useDataEngine();
+  const engine = useDataEngine();
+  const [fetchResult, setFetchResult] = useState(null);
+  const doFetchData = useCallback(async () => {
+    const result = await fetchData({
+      visualization,
+      filters,
+      d2,
+      forDashboard
+    });
 
-  var _useState = useState(null),
-      _useState2 = _slicedToArray(_useState, 2),
-      fetchResult = _useState2[0],
-      setFetchResult = _useState2[1];
+    if (result.responses.length) {
+      onResponsesReceived(result.responses);
+    }
 
-  var doFetchData = useCallback(
-  /*#__PURE__*/
-  _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee() {
-    var result;
-    return regeneratorRuntime.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            _context.next = 2;
-            return fetchData({
-              visualization: visualization,
-              filters: filters,
-              d2: d2,
-              forDashboard: forDashboard
-            });
+    return result;
+  }, [d2, filters, forDashboard, onResponsesReceived, visualization]);
+  const doFetchLegendSets = useCallback(async legendSetIds => {
+    if (!legendSetIds.length) {
+      return [];
+    }
 
-          case 2:
-            result = _context.sent;
+    const response = await apiFetchLegendSets(engine, legendSetIds);
 
-            if (result.responses.length) {
-              onResponsesReceived(result.responses);
-            }
-
-            return _context.abrupt("return", result);
-
-          case 5:
-          case "end":
-            return _context.stop();
-        }
-      }
-    }, _callee);
-  })), [d2, filters, forDashboard, onResponsesReceived, visualization]);
-  var doFetchLegendSets = useCallback(
-  /*#__PURE__*/
-  function () {
-    var _ref3 = _asyncToGenerator(
-    /*#__PURE__*/
-    regeneratorRuntime.mark(function _callee2(legendSetIds) {
-      var response;
-      return regeneratorRuntime.wrap(function _callee2$(_context2) {
-        while (1) {
-          switch (_context2.prev = _context2.next) {
-            case 0:
-              if (legendSetIds.length) {
-                _context2.next = 2;
-                break;
-              }
-
-              return _context2.abrupt("return", []);
-
-            case 2:
-              _context2.next = 4;
-              return apiFetchLegendSets(engine, legendSetIds);
-
-            case 4:
-              response = _context2.sent;
-
-              if (!(response && response.legendSets)) {
-                _context2.next = 7;
-                break;
-              }
-
-              return _context2.abrupt("return", response.legendSets.legendSets);
-
-            case 7:
-            case "end":
-              return _context2.stop();
-          }
-        }
-      }, _callee2);
-    }));
-
-    return function (_x) {
-      return _ref3.apply(this, arguments);
-    };
-  }(), [engine]);
-  useEffect(function () {
+    if (response && response.legendSets) {
+      return response.legendSets.legendSets;
+    }
+  }, [engine]);
+  useEffect(() => {
     setFetchResult(null);
 
-    var doFetchAll =
-    /*#__PURE__*/
-    function () {
-      var _ref4 = _asyncToGenerator(
-      /*#__PURE__*/
-      regeneratorRuntime.mark(function _callee3() {
-        var _ref5, responses, extraOptions, legendSetIds, dxIds, legendSets;
+    const doFetchAll = async () => {
+      const {
+        responses,
+        extraOptions
+      } = await doFetchData(visualization, filters, forDashboard);
+      const legendSetIds = [];
 
-        return regeneratorRuntime.wrap(function _callee3$(_context3) {
-          while (1) {
-            switch (_context3.prev = _context3.next) {
-              case 0:
-                _context3.next = 2;
-                return doFetchData(visualization, filters, forDashboard);
-
-              case 2:
-                _ref5 = _context3.sent;
-                responses = _ref5.responses;
-                extraOptions = _ref5.extraOptions;
-                legendSetIds = [];
-                _context3.t0 = visualization.legendDisplayStrategy;
-                _context3.next = _context3.t0 === LEGEND_DISPLAY_STRATEGY_FIXED ? 9 : _context3.t0 === LEGEND_DISPLAY_STRATEGY_BY_DATA_ITEM ? 11 : 14;
-                break;
-
-              case 9:
-                if (visualization.legendSet && visualization.legendSet.id) {
-                  legendSetIds.push(visualization.legendSet.id);
-                }
-
-                return _context3.abrupt("break", 14);
-
-              case 11:
-                // parse responses to extract legendSet ids from metaData
-                // multiple responses are only for YOY which does not support legends
-                // safe to use only the 1st
-                // dx dimensions might not be present, the empty array covers that case
-                dxIds = responses[0].metaData.dimensions.dx || [];
-                dxIds.forEach(function (dxId) {
-                  var legendSetId = responses[0].metaData.items[dxId].legendSet;
-
-                  if (legendSetId) {
-                    legendSetIds.push(legendSetId);
-                  }
-                });
-                return _context3.abrupt("break", 14);
-
-              case 14:
-                _context3.next = 16;
-                return doFetchLegendSets(legendSetIds);
-
-              case 16:
-                legendSets = _context3.sent;
-                setFetchResult({
-                  visualization: visualization,
-                  legendSets: legendSets,
-                  responses: responses,
-                  extraOptions: extraOptions
-                });
-                onLoadingComplete();
-
-              case 19:
-              case "end":
-                return _context3.stop();
-            }
+      switch (visualization.legendDisplayStrategy) {
+        case LEGEND_DISPLAY_STRATEGY_FIXED:
+          if (visualization.legendSet && visualization.legendSet.id) {
+            legendSetIds.push(visualization.legendSet.id);
           }
-        }, _callee3);
-      }));
 
-      return function doFetchAll() {
-        return _ref4.apply(this, arguments);
-      };
-    }();
+          break;
 
-    doFetchAll().catch(function (error) {
+        case LEGEND_DISPLAY_STRATEGY_BY_DATA_ITEM:
+          {
+            // parse responses to extract legendSet ids from metaData
+            // multiple responses are only for YOY which does not support legends
+            // safe to use only the 1st
+            // dx dimensions might not be present, the empty array covers that case
+            const dxIds = responses[0].metaData.dimensions.dx || [];
+            dxIds.forEach(dxId => {
+              const legendSetId = responses[0].metaData.items[dxId].legendSet;
+
+              if (legendSetId) {
+                legendSetIds.push(legendSetId);
+              }
+            });
+            break;
+          }
+      }
+
+      const legendSets = await doFetchLegendSets(legendSetIds);
+      setFetchResult({
+        visualization,
+        legendSets,
+        responses,
+        extraOptions
+      });
+      onLoadingComplete();
+    };
+
+    doFetchAll().catch(error => {
       onError(error);
     });
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -940,13 +675,13 @@ var VisualizationPlugin = function VisualizationPlugin(_ref) {
   }
 
   if (!fetchResult.visualization.type || fetchResult.visualization.type === VIS_TYPE_PIVOT_TABLE) {
-    return React.createElement(PivotPlugin, _extends({
+    return /*#__PURE__*/React.createElement(PivotPlugin, _extends({
       visualization: fetchResult.visualization,
       responses: fetchResult.responses,
       legendSets: fetchResult.legendSets
     }, props));
   } else {
-    return React.createElement(ChartPlugin, _extends({
+    return /*#__PURE__*/React.createElement(ChartPlugin, _extends({
       visualization: fetchResult.visualization,
       responses: fetchResult.responses,
       extraOptions: fetchResult.extraOptions,
