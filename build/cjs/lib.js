@@ -5,9 +5,12 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var React = require('react');
 var React__default = _interopDefault(React);
-var analytics = require('@dhis2/analytics');
-var appRuntime = require('@dhis2/app-runtime');
+var reactDom = require('react-dom');
 var PropTypes = _interopDefault(require('prop-types'));
+var appRuntime = require('@dhis2/app-runtime');
+var uiCore = require('@dhis2/ui-core');
+var analytics = require('@dhis2/analytics');
+var i18n = _interopDefault(require('@dhis2/d2-i18n'));
 require('lodash-es/pick');
 
 function _defineProperty(obj, key, value) {
@@ -130,6 +133,160 @@ const apiFetchLegendSets = (dataEngine, ids) => dataEngine.query(legendSetsQuery
   }
 });
 
+const orgUnitLevelsQuery = {
+  orgUnitLevels: {
+    resource: 'organisationUnitLevels',
+    params: {
+      fields: 'id,level,displayName~rename(name)',
+      paging: 'false'
+    }
+  }
+};
+const orgUnitsQuery = {
+  orgUnits: {
+    resource: 'organisationUnits',
+    id: ({
+      id: _id
+    }) => _id,
+    params: {
+      fields: 'id,level,displayName~rename(name),path,parent[id,displayName~rename(name)],children[level]',
+      paging: 'false',
+      userDataViewFallback: 'true'
+    }
+  }
+};
+const apiFetchOrganisationUnit = (dataEngine, id) => dataEngine.query(orgUnitsQuery, {
+  variables: {
+    id
+  }
+});
+
+const ArrowUpwardIcon = ({
+  style = {
+    width: 18,
+    height: 18
+  }
+}) => /*#__PURE__*/React__default.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  viewBox: "0 0 24 24",
+  style: style
+}, /*#__PURE__*/React__default.createElement("path", {
+  d: "M0 0h24v24H0V0z",
+  fill: "none"
+}), /*#__PURE__*/React__default.createElement("path", {
+  d: "M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z",
+  fill: "black"
+}));
+
+ArrowUpwardIcon.propTypes = {
+  style: PropTypes.object
+};
+
+const ArrowDownwardIcon = ({
+  style = {
+    width: 18,
+    height: 18
+  }
+}) => /*#__PURE__*/React__default.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  viewBox: "0 0 24 24",
+  style: style
+}, /*#__PURE__*/React__default.createElement("path", {
+  d: "M0 0h24v24H0V0z",
+  fill: "none"
+}), /*#__PURE__*/React__default.createElement("path", {
+  d: "M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z",
+  fill: "black"
+}));
+
+ArrowDownwardIcon.propTypes = {
+  style: PropTypes.object
+};
+
+const ContextualMenu = ({
+  config,
+  ouLevels,
+  onClick: _onClick
+}) => {
+  const engine = appRuntime.useDataEngine();
+  const [ouData, setOuData] = React.useState(undefined);
+  const [subLevelData, setSubLevelData] = React.useState(undefined);
+
+  const lookupLevel = levelId => ouLevels.find(item => item.level === levelId);
+
+  const doFetchOuData = React.useCallback(async ouId => {
+    const ouData = await apiFetchOrganisationUnit(engine, ouId);
+    return ouData.orgUnits;
+  }, [engine]);
+  React.useEffect(() => {
+    setOuData(null);
+
+    const doFetch = async () => {
+      const orgUnit = await doFetchOuData(config.ouId);
+      setOuData(orgUnit);
+    };
+
+    if (config.ouId) {
+      doFetch();
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+
+  }, [config]);
+  React.useEffect(() => {
+    setSubLevelData(null);
+
+    if (ouData === null || ouData === void 0 ? void 0 : ouData.children.length) {
+      const levelData = lookupLevel(ouData.children[0].level);
+
+      if (levelData) {
+        setSubLevelData(levelData);
+      }
+    }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+
+  }, [ouData]);
+  const menuItemStyle = {
+    display: 'inline-block',
+    minWidth: 200
+  };
+  return /*#__PURE__*/React__default.createElement(uiCore.Menu, null, ouData && /*#__PURE__*/React__default.createElement(uiCore.MenuItem, {
+    dense: true,
+    label: i18n.t('Change org unit')
+  }, /*#__PURE__*/React__default.createElement(uiCore.Menu, null, (ouData === null || ouData === void 0 ? void 0 : ouData.parent) && /*#__PURE__*/React__default.createElement(React__default.Fragment, null, /*#__PURE__*/React__default.createElement(uiCore.MenuItem, {
+    dense: true,
+    icon: /*#__PURE__*/React__default.createElement(ArrowUpwardIcon, null),
+    label: /*#__PURE__*/React__default.createElement("span", {
+      style: menuItemStyle
+    }, ouData.parent.name),
+    onClick: () => _onClick({
+      ou: {
+        id: ouData.parent.id
+      }
+    })
+  }), subLevelData && /*#__PURE__*/React__default.createElement(uiCore.Divider, null)), subLevelData && /*#__PURE__*/React__default.createElement(uiCore.MenuItem, {
+    dense: true,
+    icon: /*#__PURE__*/React__default.createElement(ArrowDownwardIcon, null),
+    label: /*#__PURE__*/React__default.createElement("span", {
+      style: menuItemStyle
+    }, i18n.t('{{level}} level in {{orgunit}}', {
+      level: subLevelData.name,
+      orgunit: ouData.name
+    })),
+    onClick: () => _onClick({
+      ou: {
+        id: ouData.id,
+        path: ouData.path,
+        level: subLevelData.id
+      }
+    })
+  }))));
+};
+ContextualMenu.propTypes = {
+  config: PropTypes.object,
+  ouLevels: PropTypes.array,
+  onClick: PropTypes.func
+};
+
 const ChartPlugin = ({
   visualization,
   responses,
@@ -194,7 +351,8 @@ const PivotPlugin = ({
   legendSets,
   visualization,
   style,
-  id: renderCounter
+  id: renderCounter,
+  onToggleContextualMenu
 }) => {
   return /*#__PURE__*/React__default.createElement("div", {
     style: style
@@ -202,7 +360,8 @@ const PivotPlugin = ({
     visualization: visualization,
     data: responses[0].response,
     legendSets: legendSets,
-    renderCounter: renderCounter
+    renderCounter: renderCounter,
+    onToggleContextualMenu: onToggleContextualMenu
   }));
 };
 
@@ -214,7 +373,8 @@ PivotPlugin.propTypes = {
   responses: PropTypes.arrayOf(PropTypes.object).isRequired,
   visualization: PropTypes.object.isRequired,
   id: PropTypes.number,
-  style: PropTypes.object
+  style: PropTypes.object,
+  onToggleContextualMenu: PropTypes.func
 };
 
 const peId = 'pe';
@@ -582,6 +742,17 @@ const fetchData = async ({
   };
 };
 
+var styles = {
+  backdrop: {
+    position: 'fixed',
+    height: '100%',
+    width: '100%',
+    top: 0,
+    left: 0,
+    backgroundColor: 'transparent'
+  }
+};
+
 const LEGEND_DISPLAY_STRATEGY_BY_DATA_ITEM = 'BY_DATA_ITEM';
 const LEGEND_DISPLAY_STRATEGY_FIXED = 'FIXED';
 const VisualizationPlugin = (_ref) => {
@@ -592,12 +763,34 @@ const VisualizationPlugin = (_ref) => {
     forDashboard,
     onError,
     onLoadingComplete,
-    onResponsesReceived
+    onResponsesReceived,
+    onDrill
   } = _ref,
-      props = _objectWithoutProperties(_ref, ["d2", "visualization", "filters", "forDashboard", "onError", "onLoadingComplete", "onResponsesReceived"]);
+      props = _objectWithoutProperties(_ref, ["d2", "visualization", "filters", "forDashboard", "onError", "onLoadingComplete", "onResponsesReceived", "onDrill"]);
 
   const engine = appRuntime.useDataEngine();
   const [fetchResult, setFetchResult] = React.useState(null);
+  const [contextualMenuRef, setContextualMenuRef] = React.useState(undefined);
+  const [contextualMenuConfig, setContextualMenuConfig] = React.useState({});
+
+  const onToggleContextualMenu = (ref, data) => {
+    setContextualMenuRef(ref);
+    setContextualMenuConfig(data);
+  };
+
+  const closeContextualMenu = () => setContextualMenuRef(undefined);
+
+  const onContextualMenuItemClick = args => {
+    closeContextualMenu();
+    onDrill(args);
+  };
+
+  const {
+    data: ouLevelsResponse
+  } = appRuntime.useDataQuery(orgUnitLevelsQuery, {
+    onError
+  });
+  const ouLevels = ouLevelsResponse === null || ouLevelsResponse === void 0 ? void 0 : ouLevelsResponse.orgUnitLevels.organisationUnitLevels;
   const doFetchData = React.useCallback(async () => {
     const result = await fetchData({
       visualization,
@@ -679,20 +872,31 @@ const VisualizationPlugin = (_ref) => {
     return null;
   }
 
-  if (!fetchResult.visualization.type || fetchResult.visualization.type === analytics.VIS_TYPE_PIVOT_TABLE) {
-    return /*#__PURE__*/React__default.createElement(PivotPlugin, _extends({
-      visualization: fetchResult.visualization,
-      responses: fetchResult.responses,
-      legendSets: fetchResult.legendSets
-    }, props));
-  } else {
-    return /*#__PURE__*/React__default.createElement(ChartPlugin, _extends({
-      visualization: fetchResult.visualization,
-      responses: fetchResult.responses,
-      extraOptions: fetchResult.extraOptions,
-      legendSets: fetchResult.legendSets
-    }, props));
-  }
+  const contextualMenuRect = contextualMenuRef && contextualMenuRef.current && contextualMenuRef.current.getBoundingClientRect();
+  const virtualContextualMenuElement = contextualMenuRect ? {
+    getBoundingClientRect: () => contextualMenuRect
+  } : null;
+  return /*#__PURE__*/React__default.createElement(React__default.Fragment, null, !fetchResult.visualization.type || fetchResult.visualization.type === analytics.VIS_TYPE_PIVOT_TABLE ? /*#__PURE__*/React__default.createElement(PivotPlugin, _extends({
+    visualization: fetchResult.visualization,
+    responses: fetchResult.responses,
+    legendSets: fetchResult.legendSets,
+    onToggleContextualMenu: onDrill ? onToggleContextualMenu : undefined
+  }, props)) : /*#__PURE__*/React__default.createElement(ChartPlugin, _extends({
+    visualization: fetchResult.visualization,
+    responses: fetchResult.responses,
+    extraOptions: fetchResult.extraOptions,
+    legendSets: fetchResult.legendSets
+  }, props)), contextualMenuRect && reactDom.createPortal( /*#__PURE__*/React__default.createElement("div", {
+    onClick: closeContextualMenu,
+    style: styles.backdrop
+  }, /*#__PURE__*/React__default.createElement(uiCore.Popper, {
+    reference: virtualContextualMenuElement,
+    placement: "right"
+  }, /*#__PURE__*/React__default.createElement(ContextualMenu, {
+    config: contextualMenuConfig,
+    ouLevels: ouLevels,
+    onClick: onContextualMenuItemClick
+  }))), document.body));
 };
 VisualizationPlugin.defaultProps = {
   filters: {},
@@ -707,6 +911,7 @@ VisualizationPlugin.propTypes = {
   visualization: PropTypes.object.isRequired,
   filters: PropTypes.object,
   forDashboard: PropTypes.bool,
+  onDrill: PropTypes.func,
   onError: PropTypes.func,
   onLoadingComplete: PropTypes.func,
   onResponsesReceived: PropTypes.func
